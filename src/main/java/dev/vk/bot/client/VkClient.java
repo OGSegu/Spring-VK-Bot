@@ -2,8 +2,7 @@ package dev.vk.bot.client;
 
 import dev.vk.bot.config.Config;
 import dev.vk.bot.response.LongPoolResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -11,10 +10,8 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.PostConstruct;
 
 @Service
+@Slf4j
 public class VkClient {
-
-    private static final Logger logger = LoggerFactory.getLogger(VkClient.class);
-
     @Autowired
     RestTemplate restTemplate;
 
@@ -27,7 +24,7 @@ public class VkClient {
     }
 
     public void getLongPoolServer() {
-        logger.info("Trying to get long pool server");
+        log.info("Trying to get long pool server");
         String apiRequest = String.format(config.getApiRequest(),
                 config.getMethod(),
                 config.getParameter(),
@@ -37,10 +34,10 @@ public class VkClient {
         );
         LongPoolResponse longPoolResponse = restTemplate.getForObject(apiRequest, LongPoolResponse.class);
         if (longPoolResponse == null || longPoolResponse.getResponse() == null) {
-            logger.info("Can't get long pool server");
+            log.info("Can't get long pool server");
             System.exit(1);
         }
-        logger.info("Long pool server was successfully received : " + longPoolResponse);
+        log.info("Long pool server was successfully received : " + longPoolResponse);
         setLongPoolServer(longPoolResponse);
     }
 

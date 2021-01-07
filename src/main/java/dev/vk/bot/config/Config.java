@@ -21,5 +21,4 @@ public class Config {
     String longPoolServer;
     String key;
     String ts;
-
 }

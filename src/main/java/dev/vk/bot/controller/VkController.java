@@ -1,8 +1,8 @@
 package dev.vk.bot.controller;
 
 import dev.vk.bot.config.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.vk.bot.response.Event;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,9 +11,8 @@ import org.springframework.web.client.RestTemplate;
 
 @EnableScheduling
 @RestController
+@Slf4j
 public class VkController {
-
-    private static final Logger logger = LoggerFactory.getLogger(VkController.class);
 
     @Autowired
     private RestTemplate restTemplate;
@@ -21,16 +20,24 @@ public class VkController {
     @Autowired
     private Config config;
 
-    @Scheduled(fixedRate = 5000)
+    @Autowired
+    private CommandParser commandParser;
+
+    @Scheduled(fixedRate = 1000)
     public void sendLongPoolRequest() {
-        logger.info("Sent long pool request");
+        log.info("Sending long pool request");
         String apiRequest = String.format(config.getLongPoolRequest(),
                 config.getLongPoolServer(),
                 config.getKey(),
                 config.getTs()
         );
-        logger.info("Long pool API request: " + apiRequest);
-        String longPoolResponse = restTemplate.getForObject(apiRequest, String.class);
-        logger.info("Long pool received: " + longPoolResponse);
+        Event longPoolResponse = restTemplate.getForObject(apiRequest, Event.class);
+        if (longPoolResponse == null) {
+            log.warn("Long pool is null");
+            return;
+        }
+        config.setTs(longPoolResponse.getTs());
+        log.info("Long pool received: " + longPoolResponse);
+        commandParser.parseCommands(longPoolResponse.getUpdates());
     }
 }
