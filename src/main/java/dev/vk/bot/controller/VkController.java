@@ -39,6 +39,6 @@ public class VkController {
             return;
         }
         config.setTs(longPoolResponse.getTs());
-        commandParser.parseCommands(longPoolResponse.getUpdates());
+        commandParser.parseUpdates(longPoolResponse.getUpdates());
     }
 }
