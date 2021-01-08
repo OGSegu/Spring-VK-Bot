@@ -1,6 +1,5 @@
 package dev.vk.bot.game;
 
-import dev.vk.bot.util.Pack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,7 +14,7 @@ public class Lobby {
     private State currentState = State.ALIVE;
 
     public Lobby(int packId, int playersAmount) {
-        this.pack = new Pack();
+        this.pack = Pack.getPackById(packId);
         this.playersAmount = playersAmount;
     }
 

@@ -2,10 +2,8 @@ package dev.vk.bot.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.ToString;
 
 @Data
-@ToString
 public class Update {
     private String type;
     @JsonProperty("object")
@@ -16,14 +14,12 @@ public class Update {
     private String eventId;
 
     @Data
-    @ToString
     public class ReceivedObject {
         private Message message;
         @JsonProperty("client_info")
         private ClientInfo clientInfo;
 
         @Data
-        @ToString
         public class Message {
             private long date;
             @JsonProperty("from_id")
@@ -46,7 +42,6 @@ public class Update {
             private boolean isHidden;
 
             @Data
-            @ToString
             public class Action {
                 private String type;
                 @JsonProperty("member_id")
@@ -55,7 +50,6 @@ public class Update {
         }
 
         @Data
-        @ToString
         public class ClientInfo {
             @JsonProperty("button_actions")
             private String[] buttonActions;

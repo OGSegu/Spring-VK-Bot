@@ -3,10 +3,12 @@ package dev.vk.bot.controller;
 
 import dev.vk.bot.game.Lobby;
 import dev.vk.bot.repository.Lobbies;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 
+@Slf4j
 @Controller
 public class CommandExecutor {
 
@@ -17,6 +19,7 @@ public class CommandExecutor {
     MessageSender messageSender;
 
     void executeOneArgCommand(int peerId, String command) {
+        log.info("Executing command: " + command);
         switch (command) {
             case ("Начать"):
                 messageSender.sendMessage(peerId, MessageSender.WELCOME);
@@ -34,6 +37,7 @@ public class CommandExecutor {
     }
 
     void executeMultipleArgsCommand(int peerId, String[] cmdWithArgs) {
+        log.info("Executing command: " + cmdWithArgs);
         switch (cmdWithArgs[0]) {
             case ("/создать"):
                 int packId;
@@ -55,6 +59,7 @@ public class CommandExecutor {
     }
 
     void executeAction(int peerId, String actionType) {
+        log.info("Executing action: " + actionType);
         switch (actionType) {
             case ("chat_invite_user"):
                 messageSender.sendMessage(peerId, MessageSender.WELCOME_IN_CHAT);
