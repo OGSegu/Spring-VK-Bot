@@ -1,5 +1,6 @@
 package dev.vk.bot.controller;
 
+import dev.vk.bot.response.Update.ReceivedObject.Message.Action;
 import dev.vk.bot.response.Update;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +18,42 @@ public class CommandParser {
 
     void parseCommands(Update[] updates) {
         Arrays.stream(updates)
-                .filter(event -> event.getType().equals("message_new"))
-                .forEach(event -> parseCommand(event.getObject().getUserId(), event.getObject().getBody()));
+                .filter(update -> !update.getType().equals("message_reply"))
+                .forEach(this::parseCommand);
     }
 
-    void parseCommand(int userId, String command) {
+    void parseCommand(Update update) {
+        Action action = update.getData().getMessage().getAction();
+        int peerId = update.getData().getMessage().getPeerId();
+        String command = update.getData().getMessage().getText();
+        if (action != null) {
+            answerToAction(peerId, action.getType());
+        } else {
+            answerToCommand(peerId, command);
+        }
+    }
+
+    private void answerToCommand(int peerId, String command) {
         switch (command) {
+            case ("Начать"):
+                messageSender.sendMessage(peerId, MessageSender.WELCOME_MSG);
+                break;
+            case ("/ping"):
+                messageSender.sendMessage(peerId, MessageSender.PONG_MSG);
+                break;
             case ("/помощь"):
-                messageSender.sendMessage(userId, "Помощь нужна всем!");
+                messageSender.sendMessage(peerId, "Помощь нужна всем!");
                 break;
             default:
-                messageSender.sendMessage(userId, "Такой команды не существует");
+                messageSender.sendMessage(peerId, MessageSender.NOCOMMAND_MSG);
+                break;
+        }
+    }
+
+    private void answerToAction(int peerId, String type) {
+        switch (type) {
+            case ("chat_invite_user"):
+                messageSender.sendMessage(peerId, "Thanks for invite");
                 break;
         }
     }

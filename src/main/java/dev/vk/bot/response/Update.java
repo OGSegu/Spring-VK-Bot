@@ -7,27 +7,64 @@ import lombok.ToString;
 @Data
 @ToString
 public class Update {
-    String type;
-    Message object;
+    private String type;
+    @JsonProperty("object")
+    private ReceivedObject data;
     @JsonProperty("group_id")
-    long groupId;
+    private long groupId;
     @JsonProperty("event_id")
-    String eventId;
+    private String eventId;
 
     @Data
     @ToString
-    public class Message {
-        int id;
-        long date;
-        int out;
-        @JsonProperty("user_id")
-        int userId;
-        @JsonProperty("read_state")
-        int readState;
-        String title;
-        String body;
-        @JsonProperty("owner_ids")
-        int[] ownerIds;
+    public class ReceivedObject {
+        private Message message;
+        @JsonProperty("client_info")
+        private ClientInfo clientInfo;
 
+        @Data
+        @ToString
+        public class Message {
+            private long date;
+            @JsonProperty("from_id")
+            private int fromId;
+            private int id;
+            private int out;
+            @JsonProperty("peer_id")
+            private int peerId;
+            private String text;
+            @JsonProperty("conversation_message_id")
+            private int convMessageId;
+            private Action action;
+            @JsonProperty("fwd_messages")
+            private String[] fwdMessages;
+            private boolean important;
+            @JsonProperty("random_id")
+            private int randomId;
+            private String[] attachments;
+            @JsonProperty("is_hidden")
+            private boolean isHidden;
+
+            @Data
+            @ToString
+            public class Action {
+                private String type;
+                @JsonProperty("member_id")
+                private int memberId;
+            }
+        }
+
+        @Data
+        @ToString
+        public class ClientInfo {
+            @JsonProperty("button_actions")
+            private String[] buttonActions;
+            private boolean keyboard;
+            @JsonProperty("inline_keyboard")
+            private boolean inlineKeyboard;
+            private boolean carousel;
+            @JsonProperty("lang_id")
+            private int langId;
+        }
     }
 }

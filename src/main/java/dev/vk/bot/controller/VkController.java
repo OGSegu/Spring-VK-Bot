@@ -31,13 +31,14 @@ public class VkController {
                 config.getKey(),
                 config.getTs()
         );
+        log.info(apiRequest);
         Event longPoolResponse = restTemplate.getForObject(apiRequest, Event.class);
+        log.info("Long pool received: " + longPoolResponse);
         if (longPoolResponse == null) {
             log.warn("Long pool is null");
             return;
         }
         config.setTs(longPoolResponse.getTs());
-        log.info("Long pool received: " + longPoolResponse);
         commandParser.parseCommands(longPoolResponse.getUpdates());
     }
 }

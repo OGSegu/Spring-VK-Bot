@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 @Data
 @ToString
 public class Config {
-    String apiRequest;
-    String method;
-    String parameter;
-    long groupId;
-    String token;
-    double version;
-    String longPoolRequest;
+    private String apiRequest;
+    private String method;
+    private String parameter;
+    private long groupId;
+    private String token;
+    private double version;
 
-    String longPoolServer;
-    String key;
-    String ts;
+    private String longPoolRequest;
+    private String longPoolServer;
+    private String key;
+    private String ts;
 }

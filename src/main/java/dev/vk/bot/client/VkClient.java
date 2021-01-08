@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 @Service
 @Slf4j
 public class VkClient {
+
     @Autowired
     RestTemplate restTemplate;
 

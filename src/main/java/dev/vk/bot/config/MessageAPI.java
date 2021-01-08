@@ -10,7 +10,5 @@ import org.springframework.stereotype.Component;
 @Data
 @ToString
 public class MessageAPI {
-
     private String sendMessageAPI;
-
 }

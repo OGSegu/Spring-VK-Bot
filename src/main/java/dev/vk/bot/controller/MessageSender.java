@@ -14,20 +14,25 @@ import java.util.Random;
 @Component
 public class MessageSender {
 
-    Random random = new Random();
+    public static final String WELCOME_MSG = "Привет, с помощью этого бота, ты можешь поиграть в \"Своя Игра\". Для того чтобы начать, добавь бота в беседу";
+    public static final String PONG_MSG = "Pong!";
+    public static final String NOCOMMAND_MSG = "Такой команды не существует! Введи /помощь";
+
+
+    private final Random random = new Random();
 
     @Autowired
-    Config config;
+    private Config config;
 
     @Autowired
-    MessageAPI messageAPI;
+    private MessageAPI messageAPI;
 
     @Autowired
     private RestTemplate restTemplate;
 
-    public void sendMessage(int userId, String msg) {
+    public void sendMessage(int peer_id, String msg) {
         String apiRequest = String.format(messageAPI.getSendMessageAPI(),
-                userId,
+                peer_id,
                 random.nextInt(),
                 msg,
                 config.getGroupId(),

@@ -6,6 +6,6 @@ import lombok.ToString;
 @Data
 @ToString
 public class Event {
-    String ts;
-    Update[] updates;
+    private String ts;
+    private Update[] updates;
 }
