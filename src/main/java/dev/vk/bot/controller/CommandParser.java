@@ -1,6 +1,5 @@
 package dev.vk.bot.controller;
 
-import dev.vk.bot.game.Lobby;
 import dev.vk.bot.response.Update.ReceivedObject.Message.Action;
 import dev.vk.bot.response.Update;
 import lombok.extern.slf4j.Slf4j;

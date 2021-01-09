@@ -1,6 +1,7 @@
-package dev.vk.bot.game;
+package dev.vk.bot.game.entities;
 
 
+import dev.vk.bot.game.Question;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

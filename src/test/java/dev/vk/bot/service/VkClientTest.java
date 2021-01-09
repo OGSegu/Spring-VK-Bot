@@ -1,4 +1,4 @@
-package dev.vk.bot.client;
+package dev.vk.bot.service;
 
 import dev.vk.bot.config.Config;
 import org.junit.jupiter.api.Test;

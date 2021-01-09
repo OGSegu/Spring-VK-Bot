@@ -1,8 +1,9 @@
 package dev.vk.bot.controller;
 
 
-import dev.vk.bot.game.Lobby;
-import dev.vk.bot.repository.Lobbies;
+import dev.vk.bot.game.entities.Lobby;
+import dev.vk.bot.repositories.LobbyRepository;
+import dev.vk.bot.service.LobbyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Controller;
 public class CommandExecutor {
 
     @Autowired
-    Lobbies lobbies;
+    LobbyService lobbyService;
 
     @Autowired
     MessageSender messageSender;
@@ -50,7 +51,7 @@ public class CommandExecutor {
                     return;
                 }
                 messageSender.sendMessage(peerId, String.format(MessageSender.LOBBY_INFO, packId, playersAmount));
-                lobbies.add(new Lobby(packId, playersAmount));
+
                 break;
             case ("/паки"):
                 messageSender.sendMessage(peerId, "Паки: ");
@@ -63,6 +64,7 @@ public class CommandExecutor {
         switch (actionType) {
             case ("chat_invite_user"):
                 messageSender.sendMessage(peerId, MessageSender.WELCOME_IN_CHAT);
+                lobbyService.createLobby(peerId);
                 break;
         }
     }

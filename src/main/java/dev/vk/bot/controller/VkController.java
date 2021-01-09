@@ -34,7 +34,7 @@ public class VkController {
         log.info(apiRequest);
         Event longPoolResponse = restTemplate.getForObject(apiRequest, Event.class);
         log.info("Long pool received: " + longPoolResponse);
-        if (longPoolResponse == null) {
+        if (longPoolResponse == null || longPoolResponse.getUpdates() == null) {
             log.warn("Long pool is null");
             return;
         }

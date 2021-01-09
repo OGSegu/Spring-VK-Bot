@@ -3,7 +3,7 @@ package dev.vk.bot.response;
 import lombok.Data;
 
 @Data
-public class LongPoolResponse {
+public class LongPool {
 
     private Response response;
 

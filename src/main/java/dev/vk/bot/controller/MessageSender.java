@@ -21,7 +21,6 @@ public class MessageSender {
     public static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
     public static final String LOBBY_INFO = "Пак: %s %nКол-во игроков: %d";
 
-
     private final Random random = new Random();
 
     @Autowired
@@ -33,9 +32,9 @@ public class MessageSender {
     @Autowired
     private RestTemplate restTemplate;
 
-    public void sendMessage(int peer_id, String msg) {
+    public void sendMessage(int peerId, String msg) {
         String apiRequest = String.format(messageAPI.getSendMessageAPI(),
-                peer_id,
+                peerId,
                 random.nextInt(),
                 msg,
                 config.getGroupId(),
