@@ -24,7 +24,7 @@ public class VkController {
     private RestTemplate restTemplate;
 
     @Autowired
-    private CommandParser commandParser;
+    private UpdateParser updateParser;
 
     @Scheduled(fixedRate = 1000)
     public void sendLongPoolRequest() {
@@ -42,6 +42,6 @@ public class VkController {
             return;
         }
         mainConfig.setTs(longPoolResponse.getTs());
-        commandParser.parseUpdates(longPoolResponse.getUpdates());
+        updateParser.parseUpdates(longPoolResponse.getUpdates());
     }
 }

@@ -21,16 +21,15 @@ public class Game {
     @Column(name = "players_amount")
     private int currentPlayersAmount;
 
-
     @OneToOne
     private Lobby lobby;
 
-    @Transient
-    private int minPlayersAmount;
+    @Column(name = "players_to_start")
+    private int playersToStart;
 
 
     public Game(int playersAmount, Lobby lobby) {
-        this.minPlayersAmount = playersAmount;
+        this.playersToStart = playersAmount;
         this.lobby = lobby;
     }
 

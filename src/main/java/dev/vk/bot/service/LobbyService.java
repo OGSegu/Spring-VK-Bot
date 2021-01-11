@@ -3,6 +3,7 @@ package dev.vk.bot.service;
 import dev.vk.bot.controller.MessageSender;
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Lobby;
+import dev.vk.bot.exception.LobbyCanNotBeFound;
 import dev.vk.bot.repositories.LobbyRepository;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +25,7 @@ public class LobbyService extends VkClient {
     GameService gameService;
 
     @Autowired
-    LobbyRepository lobbyRepository;
+    LobbyRepository lobbyRepo;
 
     public static final int PEER_NUMBER = 2000000000;
 
@@ -32,12 +33,12 @@ public class LobbyService extends VkClient {
         log.info("Creating lobby");
         int chatId = peerId - PEER_NUMBER;
         Lobby lobby = new Lobby(chatId, peerId);
-        lobbyRepository.save(lobby);
+        lobbyRepo.save(lobby);
         log.info("Lobby was successfully saved");
     }
 
     public void createGameForLobby(int peerId, int playersAmount) {
-        Lobby lobby = lobbyRepository.findByPeerId(peerId);
+        Lobby lobby = lobbyRepo.findByPeerId(peerId);
         if (lobby == null) {
             messageSender.sendMessage(peerId, "Произошла ошибка, лобби не может быть найдено");
             return;
@@ -49,8 +50,19 @@ public class LobbyService extends VkClient {
         }
         Game game = gameService.createGame(playersAmount, lobby);
         lobby.setGame(game);
-        lobbyRepository.save(lobby);
+        lobbyRepo.save(lobby);
+        gameService.sendStateMsg(game);
     }
+
+    public Game getGameInLobby(int peerId) throws LobbyCanNotBeFound {
+        Lobby lobby = lobbyRepo.findByPeerId(peerId);
+        if (lobby == null) {
+            messageSender.sendMessage(peerId, "Произошла ошибка, лобби не может быть найдено");
+            throw new LobbyCanNotBeFound();
+        }
+        return lobby.getGame();
+    }
+
 
     @Bean
     public LobbyService getLobbyService() {

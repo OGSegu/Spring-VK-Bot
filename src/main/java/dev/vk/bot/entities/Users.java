@@ -1,11 +1,13 @@
 package dev.vk.bot.entities;
 
 import lombok.Data;
-import org.hibernate.annotations.DynamicUpdate;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
+@NoArgsConstructor
 @Entity
 public class Users {
 
@@ -13,12 +15,17 @@ public class Users {
     @Column(unique = true)
     private Long userId;
 
+    @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
-    private int ELO;
+    private int ELO = 0;
+
+    public Users(long userId) {
+        this.userId = userId;
+    }
 
     @ManyToOne
-    private Game currentGame;
+    private Game currentGame = null;
 
     enum Role {
         ADMIN,
