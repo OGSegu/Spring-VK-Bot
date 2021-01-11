@@ -1,8 +1,6 @@
 package dev.vk.bot.controller;
 
 
-import dev.vk.bot.entities.Game;
-import dev.vk.bot.exception.LobbyCanNotBeFound;
 import dev.vk.bot.service.GameService;
 import dev.vk.bot.service.LobbyService;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +67,9 @@ public class UpdateExecutor {
         switch (command) {
             case("/+"):
                 gameService.addParticipant(peerId, userId);
+                break;
+            case("/="):
+                gameService.sendStateMsg(peerId);
                 break;
         }
     }

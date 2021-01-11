@@ -32,14 +32,16 @@ public class GameService {
     @Autowired
     MessageSender messageSender;
 
-    public void sendStateMsg(Game game) {
-        int peerId = lobbyRepo.findByGameId(game.getId()).getPeerId();
+    public void sendStateMsg(int peerId) {
+        Lobby lobby = lobbyRepo.findByPeerId(peerId);
+        Game game = lobby.getGame();
         String msg = String.format(MessageSender.GAME_INFO, game.getCurrentPlayersAmount(), game.getPlayersToStart());
         if (game.getCurrentPlayersAmount() == game.getPlayersToStart()) {
             msg += "\nВсе игроки набраны. Игра начинается!";
         }
         messageSender.sendMessage(peerId, msg);
     }
+
 
     public Game createGame(int playersAmount, Lobby lobby) {
         Game game = new Game(playersAmount, lobby);
@@ -48,10 +50,7 @@ public class GameService {
     }
 
     public void addParticipant(int peerId, long userId) {
-        Game game = lobbyRepo.findByPeerId(peerId).getGame();
-        int currentPlayersAmount = game.getCurrentPlayersAmount();
-        game.setCurrentPlayersAmount(++currentPlayersAmount);
-        gameRepo.save(game);
+        Game game = lobbyRepo.findByPeerId(peerId).getGame(); // TODO ДВА РАЗА ОТРАБАТЫВАЕТ (строка 37)
         Optional<Users> user = usersRepo.findById(userId);
         if (user.isEmpty()) {
             log.warn("Users can not be found");
@@ -61,9 +60,12 @@ public class GameService {
             messageSender.sendMessage(game.getLobby().getPeerId(), "Вы уже участвуете в игре");
             return;
         }
+        int currentPlayersAmount = game.getCurrentPlayersAmount();
+        game.setCurrentPlayersAmount(++currentPlayersAmount);
+        gameRepo.save(game);
         user.get().setCurrentGame(game);
         usersRepo.save(user.get());
-        sendStateMsg(game);
+        sendStateMsg(peerId);
     }
 
     public void startGame() {

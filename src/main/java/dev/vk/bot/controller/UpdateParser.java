@@ -16,7 +16,8 @@ import java.util.List;
 public class UpdateParser {
 
     private static final List<String> GAME_CMDS = Arrays.asList(
-            "/+"
+            "/+",
+            "/="
     );
 
     private static final List<String> MAIN_CMDS = Arrays.asList(

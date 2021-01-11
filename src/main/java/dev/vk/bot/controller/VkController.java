@@ -26,7 +26,7 @@ public class VkController {
     @Autowired
     private UpdateParser updateParser;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 100)
     public void sendLongPoolRequest() {
         log.info("Sending long pool request");
         String apiRequest = String.format(longPoolAPI.getLongPoolServerRequest(),
