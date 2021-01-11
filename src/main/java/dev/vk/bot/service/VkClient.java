@@ -1,6 +1,7 @@
 package dev.vk.bot.service;
 
 import dev.vk.bot.config.Config;
+import dev.vk.bot.config.LongPoolAPI;
 import dev.vk.bot.response.LongPool;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,10 @@ public class VkClient {
     protected RestTemplate restTemplate;
 
     @Autowired
-    protected Config config;
+    protected Config mainConfig;
+
+    @Autowired
+    protected LongPoolAPI longPoolConfig;
 
     @PostConstruct
     void init() {
@@ -28,13 +32,12 @@ public class VkClient {
 
     public void getLongPoolServer() {
         log.info("Trying to get long pool server");
-        String apiRequest = String.format(config.getApiRequest(),
-                config.getMethod(),
-                config.getParameter(),
-                config.getGroupId(),
-                config.getToken(),
-                config.getVersion()
+        String apiRequest = String.format(longPoolConfig.getLongPoolServerGetterAPI(),
+                mainConfig.getGroupId(),
+                mainConfig.getToken(),
+                mainConfig.getVersion()
         );
+        log.info("API REQUEST: " + apiRequest);
         LongPool longPool = restTemplate.getForObject(apiRequest, LongPool.class);
         if (longPool == null || longPool.getResponse() == null) {
             log.info("Can't get long pool server");
@@ -48,8 +51,8 @@ public class VkClient {
         String server = longPool.getResponse().getServer();
         String key = longPool.getResponse().getKey();
         String ts = longPool.getResponse().getTs();
-        config.setLongPoolServer(server);
-        config.setKey(key);
-        config.setTs(ts);
+        mainConfig.setLongPoolServer(server);
+        mainConfig.setKey(key);
+        mainConfig.setTs(ts);
     }
 }

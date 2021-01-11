@@ -13,12 +13,14 @@ import java.util.Arrays;
 @Controller
 public class CommandParser {
 
+    private final String REPLY_MSG = "message_reply";
+
     @Autowired
     CommandExecutor commandExecutor;
 
     void parseUpdates(Update[] updates) {
         Arrays.stream(updates)
-                .filter(update -> !update.getType().equals("message_reply"))
+                .filter(update -> !update.getType().equals(REPLY_MSG))
                 .forEach(this::parseUpdate);
     }
 

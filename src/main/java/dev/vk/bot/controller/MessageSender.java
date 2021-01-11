@@ -15,11 +15,11 @@ import java.util.Random;
 public class MessageSender {
 
     public static final String WELCOME = "Привет, с помощью этого бота, ты можешь поиграть в \"Своя Игра\". Для того чтобы начать, добавь бота в беседу";
-    public static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *номер пака* *кол-во игроков*";
+    public static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков*";
     public static final String PONG = "Pong!";
     public static final String UNKNOWN_COMMAND = "Ошибка! Такой команды не существует! Введите /помощь";
     public static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
-    public static final String LOBBY_INFO = "Пак: %s %nКол-во игроков: %d";
+    public static final String GAME_INFO = "------Игра------\nКол-во игроков: %d/%d";
 
     private final Random random = new Random();
 

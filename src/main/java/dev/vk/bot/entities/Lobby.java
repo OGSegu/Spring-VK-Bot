@@ -1,13 +1,13 @@
-package dev.vk.bot.game.entities;
+package dev.vk.bot.entities;
 
 import lombok.Data;
-import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
-@ToString
 @Entity
 @Table(schema = "public", name = "lobby")
 public class Lobby {
@@ -22,11 +22,11 @@ public class Lobby {
     @Column(unique = true)
     private int chatId;
 
-    @Enumerated(EnumType.STRING)
-    private State currentState = State.ALIVE;
-
     @Column(updatable = false)
     LocalDateTime invitedDate;
+
+    @OneToOne
+    Game game;
 
     public Lobby() {
 
@@ -38,8 +38,7 @@ public class Lobby {
         this.invitedDate = LocalDateTime.now();
     }
 
-    enum State {
-        ALIVE,
-        ENDED;
+    public boolean isGameRunning() {
+        return game != null;
     }
 }

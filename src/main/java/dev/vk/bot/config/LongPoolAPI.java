@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 @Data
 public class LongPoolAPI {
 
-    private String apiRequest;
-    private String method;
-    private String parameter;
-    private String longPoolRequest;
+    private String longPoolServerGetterAPI;
+    private String longPoolServerRequest;
 
 }

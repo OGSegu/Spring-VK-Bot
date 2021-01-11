@@ -1,8 +1,9 @@
 package dev.vk.bot.service;
 
-import dev.vk.bot.game.entities.Lobby;
+import dev.vk.bot.controller.MessageSender;
+import dev.vk.bot.entities.Game;
+import dev.vk.bot.entities.Lobby;
 import dev.vk.bot.repositories.LobbyRepository;
-import dev.vk.bot.response.LobbyInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -17,24 +18,15 @@ import org.springframework.stereotype.Service;
 public class LobbyService extends VkClient {
 
     @Autowired
+    MessageSender messageSender;
+
+    @Autowired
+    GameService gameService;
+
+    @Autowired
     LobbyRepository lobbyRepository;
 
     public static final int PEER_NUMBER = 2000000000;
-
-    // Работает только через OAuth
-    public LobbyInfo getLobbyInfo(int chatId) {
-        String apiRequest = String.format(config.getApiRequest(),
-                "messages.getChat",
-                "chat_id",
-                chatId,
-                config.getToken(),
-                config.getVersion()
-        );
-        log.info("API Request = " + apiRequest);
-        LobbyInfo lobbyInfo = restTemplate.getForObject(apiRequest, LobbyInfo.class);
-        log.info("Lobby Info = " + lobbyInfo);
-        return lobbyInfo;
-    }
 
     public void createLobby(int peerId) {
         log.info("Creating lobby");
@@ -44,8 +36,25 @@ public class LobbyService extends VkClient {
         log.info("Lobby was successfully saved");
     }
 
+    public void createGameForLobby(int peerId, int playersAmount) {
+        Lobby lobby = lobbyRepository.findByPeerId(peerId);
+        if (lobby == null) {
+            messageSender.sendMessage(peerId, "Произошла ошибка, лобби не может быть найдено");
+            return;
+        }
+        if (lobby.isGameRunning()) {
+            messageSender.sendMessage(peerId, "Набор игроков или игра уже запущена");
+            log.info(lobby.getGame().toString());
+            return;
+        }
+        Game game = gameService.createGame(playersAmount, lobby);
+        lobby.setGame(game);
+        lobbyRepository.save(lobby);
+    }
+
     @Bean
     public LobbyService getLobbyService() {
         return new LobbyService();
     }
+
 }

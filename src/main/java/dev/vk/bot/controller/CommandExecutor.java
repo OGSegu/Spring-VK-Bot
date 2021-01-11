@@ -1,17 +1,19 @@
 package dev.vk.bot.controller;
 
 
-import dev.vk.bot.game.entities.Lobby;
-import dev.vk.bot.repositories.LobbyRepository;
 import dev.vk.bot.service.LobbyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 
+import java.util.Arrays;
+
 @Slf4j
 @Controller
 public class CommandExecutor {
+
+    private final String INVITE_EVENT = "chat_invite_user";
 
     @Autowired
     LobbyService lobbyService;
@@ -25,6 +27,7 @@ public class CommandExecutor {
             case ("Начать"):
                 messageSender.sendMessage(peerId, MessageSender.WELCOME);
                 break;
+
             case ("/ping"):
                 messageSender.sendMessage(peerId, MessageSender.PONG);
                 break;
@@ -38,31 +41,24 @@ public class CommandExecutor {
     }
 
     void executeMultipleArgsCommand(int peerId, String[] cmdWithArgs) {
-        log.info("Executing command: " + cmdWithArgs);
+        log.info("Executing command: " + Arrays.toString(cmdWithArgs));
         switch (cmdWithArgs[0]) {
             case ("/создать"):
-                int packId;
                 int playersAmount;
                 try {
-                    packId = Integer.parseInt(cmdWithArgs[1]);
-                    playersAmount = Integer.parseInt(cmdWithArgs[2]);
+                    playersAmount = Integer.parseInt(cmdWithArgs[1]);
                 } catch (NumberFormatException e) {
                     messageSender.sendMessage(peerId, MessageSender.WRONG_ARGS);
                     return;
                 }
-                messageSender.sendMessage(peerId, String.format(MessageSender.LOBBY_INFO, packId, playersAmount));
-
-                break;
-            case ("/паки"):
-                messageSender.sendMessage(peerId, "Паки: ");
-                break;
+                lobbyService.createGameForLobby(peerId, playersAmount);
         }
     }
 
     void executeAction(int peerId, String actionType) {
         log.info("Executing action: " + actionType);
         switch (actionType) {
-            case ("chat_invite_user"):
+            case (INVITE_EVENT):
                 messageSender.sendMessage(peerId, MessageSender.WELCOME_IN_CHAT);
                 lobbyService.createLobby(peerId);
                 break;

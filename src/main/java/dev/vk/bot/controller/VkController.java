@@ -1,6 +1,7 @@
 package dev.vk.bot.controller;
 
 import dev.vk.bot.config.Config;
+import dev.vk.bot.config.LongPoolAPI;
 import dev.vk.bot.response.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,12 @@ import org.springframework.web.client.RestTemplate;
 public class VkController {
 
     @Autowired
-    private RestTemplate restTemplate;
+    private Config mainConfig;
+    @Autowired
+    private LongPoolAPI longPoolAPI;
 
     @Autowired
-    private Config config;
+    private RestTemplate restTemplate;
 
     @Autowired
     private CommandParser commandParser;
@@ -26,10 +29,10 @@ public class VkController {
     @Scheduled(fixedRate = 1000)
     public void sendLongPoolRequest() {
         log.info("Sending long pool request");
-        String apiRequest = String.format(config.getLongPoolRequest(),
-                config.getLongPoolServer(),
-                config.getKey(),
-                config.getTs()
+        String apiRequest = String.format(longPoolAPI.getLongPoolServerRequest(),
+                mainConfig.getLongPoolServer(),
+                mainConfig.getKey(),
+                mainConfig.getTs()
         );
         log.info(apiRequest);
         Event longPoolResponse = restTemplate.getForObject(apiRequest, Event.class);
@@ -38,7 +41,7 @@ public class VkController {
             log.warn("Long pool is null");
             return;
         }
-        config.setTs(longPoolResponse.getTs());
+        mainConfig.setTs(longPoolResponse.getTs());
         commandParser.parseUpdates(longPoolResponse.getUpdates());
     }
 }
