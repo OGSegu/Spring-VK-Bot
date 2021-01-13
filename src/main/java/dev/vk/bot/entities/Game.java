@@ -1,11 +1,13 @@
 package dev.vk.bot.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 
 @Data
+@EqualsAndHashCode(of = "id")
 @Slf4j
 @Entity
 @Table(schema = "public", name = "game")
@@ -27,6 +29,9 @@ public class Game {
     @Column(name = "players_to_start")
     private int playersToStart;
 
+    @OneToOne
+    private Question currentQuestion;
+
 
     public Game(int playersAmount, Lobby lobby) {
         this.playersToStart = playersAmount;
@@ -37,8 +42,9 @@ public class Game {
 
     }
 
-    enum State {
+    public enum State {
         PREPARING,
+        STARTING,
         WAIT_QUESTION,
         WAIT_ANSWER,
     }

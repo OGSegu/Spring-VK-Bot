@@ -1,5 +1,10 @@
 package dev.vk.bot.controller;
 
+import dev.vk.bot.entities.Game;
+import dev.vk.bot.entities.Lobby;
+import dev.vk.bot.entities.Users;
+import dev.vk.bot.repositories.LobbyRepository;
+import dev.vk.bot.repositories.UsersRepository;
 import dev.vk.bot.response.Update;
 import dev.vk.bot.response.Update.ReceivedObject.Message.Action;
 import dev.vk.bot.service.UsersService;
@@ -9,24 +14,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Controller
 public class UpdateParser {
 
-    private static final List<String> GAME_CMDS = Arrays.asList(
-            "/+",
-            "/="
-    );
-
-    private static final List<String> MAIN_CMDS = Arrays.asList(
-            "/ping",
-            "/помощь",
-            "/создать"
-    );
-
     private final String REPLY_MSG = "message_reply";
+
+    @Autowired
+    LobbyRepository lobbyRepo;
+
+    @Autowired
+    UsersRepository userRepo;
 
     @Autowired
     UsersService usersService;
@@ -44,7 +44,9 @@ public class UpdateParser {
         Action action = update.getData().getMessage().getAction();
         int peerId = update.getData().getMessage().getPeerId();
         int userId = update.getData().getMessage().getFromId();
-        initUser(userId);
+        if (!usersService.userExists(userId)) {
+            usersService.registerUser(userId);
+        }
         String command = update.getData().getMessage().getText();
         if (action != null) {
             updateExecutor.executeAction(peerId, action.getType());
@@ -53,23 +55,45 @@ public class UpdateParser {
         }
     }
 
-    private void initUser(long userId) {
-        if (!usersService.userExists(userId)) {
-            usersService.registerUser(userId);
-            log.info("User was successfully registered");
+
+    private void parseCommand(long userId, int peerId, String command) {
+        Lobby lobby = lobbyRepo.findByPeerId(peerId);
+        Optional<Users> userOptional = userRepo.findById(userId);
+        Users user;
+        if (userOptional.isEmpty()) {
+            user = usersService.registerUser(userId);
+        } else {
+            user = userOptional.get();
+        }
+        if (lobby.isGameRunning()) {
+            parseGameCmd(lobby.getGame(), user, peerId, command);
+        } else {
+            parseMainCmd(peerId, command);
         }
     }
 
-    private void parseCommand(long userId, int peerId, String command) {
+    private void parseMainCmd(int peerId, String command) {
         String[] cmdWithArgs = command.split(" ");
-        if (GAME_CMDS.contains(command)) {
-            updateExecutor.executeGameCmd(userId, peerId, command);
+        if (cmdWithArgs.length <= 1) {
+            updateExecutor.executeMainCmd(peerId, command);
         } else {
-            if (cmdWithArgs.length <= 1) {
-                updateExecutor.executeMainCmd(peerId, command);
-            } else {
-                updateExecutor.executeMultipleArgsCmd(peerId, cmdWithArgs);
-            }
+            updateExecutor.executeMultipleArgsCmd(peerId, cmdWithArgs);
+        }
+    }
+
+    private void parseGameCmd(Game game, Users user, int peerId, String command) {
+        switch (game.getState().name()) {
+            case ("PREPARING"):
+                updateExecutor.executeGamePrepCmd(game, user.getUserId(), peerId, command);
+                break;
+            case ("STARTING"):
+                if (game.getId().equals(user.getCurrentGame().getId())) {
+                    updateExecutor.executeGameStartingCmd(game, user.getUserId(), peerId, command);
+                }
+                break;
+            default:
+                log.info("Something went wrong");
+                break;
         }
     }
 

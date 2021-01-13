@@ -1,6 +1,7 @@
 package dev.vk.bot.controller;
 
 
+import dev.vk.bot.entities.Game;
 import dev.vk.bot.service.GameService;
 import dev.vk.bot.service.LobbyService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,21 @@ import java.util.Arrays;
 @Controller
 public class UpdateExecutor {
 
-    private final String INVITE_EVENT = "chat_invite_user";
+    /* EVENT */
+    private static final String INVITE_EVENT = "chat_invite_user";
+
+    /* ERROR */
+    private static final String UNKNOWN_COMMAND = "Ошибка! Такой команды не существует! Введите /помощь";
+    private static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
+
+    /* CHAT */
+    private static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков*";
+
+    /* PRIVATE */
+    public static final String WELCOME = "Привет, с помощью этого бота, ты можешь поиграть в \"Своя Игра\". Для того чтобы начать, добавь бота в беседу";
+
+    /* OTHER */
+    public static final String PONG = "Pong!";
 
     @Autowired
     GameService gameService;
@@ -29,16 +44,16 @@ public class UpdateExecutor {
         log.info("Executing command: " + command);
         switch (command) {
             case ("Начать"):
-                messageSender.sendMessage(peerId, MessageSender.WELCOME);
+                messageSender.sendMessage(peerId, WELCOME);
                 break;
             case ("/ping"):
-                messageSender.sendMessage(peerId, MessageSender.PONG);
+                messageSender.sendMessage(peerId, PONG);
                 break;
             case ("/помощь"):
-                messageSender.sendMessage(peerId, "Помощь нужна всем!");
+                messageSender.sendMessage(peerId, "тест");
                 break;
             default:
-                messageSender.sendMessage(peerId, MessageSender.UNKNOWN_COMMAND);
+                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
                 break;
         }
     }
@@ -51,34 +66,52 @@ public class UpdateExecutor {
                 try {
                     playersAmount = Integer.parseInt(cmdWithArgs[1]);
                 } catch (NumberFormatException e) {
-                    messageSender.sendMessage(peerId, MessageSender.WRONG_ARGS);
+                    messageSender.sendMessage(peerId, WRONG_ARGS);
                     return;
                 }
                 lobbyService.createGameForLobby(peerId, playersAmount);
                 break;
+            default:
+                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
+                break;
         }
     }
 
-    void executeGameAction(long userId, int peerId) {
-
-    }
-
-    void executeGameCmd(long userId, int peerId, String command) {
+    void executeGamePrepCmd(Game game, long userId, int peerId, String command) {
         switch (command) {
-            case("/+"):
+            case ("/+"):
                 gameService.addParticipant(peerId, userId);
                 break;
-            case("/="):
-                gameService.sendStateMsg(peerId);
+            case ("/="):
+                gameService.sendStateMsg(game, peerId);
+                break;
+            default:
+                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
                 break;
         }
+    }
+
+    void executeGameStartingCmd(Game game, long userId, int peerId, String command) {
+        String[] cmdWithArgs = command.split(" ");
+        switch (cmdWithArgs[0]) {
+            case ("/o"):
+                gameService.checkAnswer(game, userId, peerId, getAnswer(command));
+                break;
+            default:
+                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
+                break;
+        }
+    }
+
+    private String getAnswer(String command) {
+        return command.substring(3);
     }
 
     void executeAction(int peerId, String actionType) {
         log.info("Executing action: " + actionType);
         switch (actionType) {
             case (INVITE_EVENT):
-                messageSender.sendMessage(peerId, MessageSender.WELCOME_IN_CHAT);
+                messageSender.sendMessage(peerId, WELCOME_IN_CHAT);
                 lobbyService.createLobby(peerId);
                 break;
         }

@@ -1,11 +1,13 @@
 package dev.vk.bot.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(of = "id")
 @Entity
 @Table(schema = "public", name = "lobby")
 public class Lobby {

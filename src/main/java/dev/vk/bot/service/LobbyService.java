@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class LobbyService extends VkClient {
 
+    private static final String GAME_IS_RUNNING = "Набор игроков или игра уже запущена";
+    private static final String NO_LOBBY_FOUND = "Произошла ошибка, лобби не может быть найдено";
+
     @Autowired
     MessageSender messageSender;
 
@@ -39,23 +42,18 @@ public class LobbyService extends VkClient {
     public void createGameForLobby(int peerId, int playersAmount) {
         Lobby lobby = lobbyRepo.findByPeerId(peerId);
         if (lobby == null) {
-            messageSender.sendMessage(peerId, "Произошла ошибка, лобби не может быть найдено");
+            messageSender.sendMessage(peerId, NO_LOBBY_FOUND);
             return;
         }
         if (lobby.isGameRunning()) {
-            messageSender.sendMessage(peerId, "Набор игроков или игра уже запущена");
+            messageSender.sendMessage(peerId, GAME_IS_RUNNING);
             log.info(lobby.getGame().toString());
             return;
         }
         Game game = gameService.createGame(playersAmount, lobby);
         lobby.setGame(game);
         lobbyRepo.save(lobby);
-        gameService.sendStateMsg(peerId);
-    }
-
-    @Bean
-    public LobbyService getLobbyService() {
-        return new LobbyService();
+        gameService.sendStateMsg(game, peerId);
     }
 
 }
