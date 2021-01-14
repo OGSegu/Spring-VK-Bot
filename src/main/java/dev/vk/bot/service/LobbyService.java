@@ -7,7 +7,6 @@ import dev.vk.bot.repositories.LobbyRepository;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @EqualsAndHashCode(callSuper = true)
@@ -19,16 +18,17 @@ public class LobbyService extends VkClient {
     private static final String GAME_IS_RUNNING = "Набор игроков или игра уже запущена";
     private static final String NO_LOBBY_FOUND = "Произошла ошибка, лобби не может быть найдено";
 
-    @Autowired
-    MessageSender messageSender;
-
-    @Autowired
-    GameService gameService;
-
-    @Autowired
-    LobbyRepository lobbyRepo;
+    private final MessageSender messageSender;
+    private final GameService gameService;
+    private final LobbyRepository lobbyRepo;
 
     public static final int PEER_NUMBER = 2000000000;
+
+    public LobbyService(MessageSender messageSender, GameService gameService, LobbyRepository lobbyRepo) {
+        this.messageSender = messageSender;
+        this.gameService = gameService;
+        this.lobbyRepo = lobbyRepo;
+    }
 
     public void createLobby(int peerId) {
         log.info("Creating lobby");

@@ -18,8 +18,4 @@ public class Question {
     //Image ??
     private String question;
     private String answer;
-
-    public Question() {
-
-    }
 }

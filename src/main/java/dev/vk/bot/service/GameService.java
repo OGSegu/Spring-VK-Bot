@@ -9,9 +9,9 @@ import dev.vk.bot.repositories.GameRepository;
 import dev.vk.bot.repositories.LobbyRepository;
 import dev.vk.bot.repositories.QuestionRepository;
 import dev.vk.bot.repositories.UsersRepository;
+import dev.vk.bot.session.GameSession;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class GameService {
 
 
     /* ANSWER THREAD */
-    Map<Game, Thread> answerThreadMap = new HashMap<>();
+    Map<Game, GameSession> gameSessionMap = new HashMap<>();
 
 
     /* ERROR */
@@ -43,20 +43,21 @@ public class GameService {
     public static final String NO_ANSWER = "Никому не удалось ответить.%nПравильный ответ: %s";
 
 
-    @Autowired
-    LobbyRepository lobbyRepo;
+    private final LobbyRepository lobbyRepo;
+    private final GameRepository gameRepo;
+    private final UsersRepository usersRepo;
+    private final QuestionRepository questionRepo;
+    private final MessageSender messageSender;
+    private final UsersService usersService;
 
-    @Autowired
-    GameRepository gameRepo;
-
-    @Autowired
-    UsersRepository usersRepo;
-
-    @Autowired
-    QuestionRepository questionRepo;
-
-    @Autowired
-    MessageSender messageSender;
+    public GameService(LobbyRepository lobbyRepo, GameRepository gameRepo, UsersRepository usersRepo, QuestionRepository questionRepo, MessageSender messageSender, UsersService usersService) {
+        this.lobbyRepo = lobbyRepo;
+        this.gameRepo = gameRepo;
+        this.usersRepo = usersRepo;
+        this.questionRepo = questionRepo;
+        this.messageSender = messageSender;
+        this.usersService = usersService;
+    }
 
 
     public Game getGame(int peerId) {
@@ -84,16 +85,17 @@ public class GameService {
 
     public void addParticipant(int peerId, long userId) {
         Game game = getGame(peerId);
-        Optional<Users> user = usersRepo.findById(userId);
-        if (user.get().getCurrentGame() != null) {
+        Optional<Users> userOptional = usersRepo.findById(userId);
+        Users user = usersService.getUserFromOptional(userOptional, userId);
+        if (user.getCurrentGame() != null) {
             messageSender.sendMessage(game.getLobby().getPeerId(), ALREADY_IN_GAME);
             return;
         }
         int currentPlayersAmount = game.getCurrentPlayersAmount();
         game.setCurrentPlayersAmount(++currentPlayersAmount);
         gameRepo.save(game);
-        user.get().setCurrentGame(game);
-        usersRepo.save(user.get());
+        user.setCurrentGame(game);
+        usersRepo.save(user);
         if (isReadyToStart(game)) {
             sendReadyMsg(peerId);
             startGame(game, peerId);
@@ -103,53 +105,54 @@ public class GameService {
     }
 
     public void startGame(Game game, int peerId) {
-        game.setState(Game.State.STARTING);
+        game.setState(Game.State.ALIVE);
         messageSender.sendMessage(peerId, WELCOME_TO_GAME);
         startGameProcess(game, peerId);
     }
 
     public void startGameProcess(Game game, int peerId) {
-        sendNextQuestion(game, peerId);
+        GameSession gameSession = new GameSession(this, game, peerId);
+        gameSessionMap.put(game, gameSession);
+        gameSession.start();
         gameRepo.save(game);
     }
 
-    public void sendNextQuestion(Game game, int peerId) {
+//    public void sendNextQuestion(Game game, int peerId) {
 //        int questionIterator = game.getQuestionIterator();
 //        if (questionIterator >= game.getMaxQuestion()) {
-//            endGame(game, peerId);
+//            stopGame(game, peerId);
 //            return;
 //        }
 //        game.setQuestionIterator(++questionIterator);
-        Question question = questionRepo.getRandomQuestion();
-        game.setCurrentQuestion(question);
-        messageSender.sendMessage(peerId, String.format(QUESTION, question.getQuestion()));
-        gameRepo.save(game);
-        Thread answerThread = new Thread(() -> {
-            try {
-                Thread.sleep(25000);
-                messageSender.sendMessage(peerId, String.format(NO_ANSWER, question.getAnswer()));
-                sendNextQuestion(game, peerId);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-        answerThreadMap.put(game, answerThread);
-        answerThread.start();
-    }
+//        Question question = questionRepo.getRandomQuestion();
+//        game.setCurrentQuestion(question);
+//        messageSender.sendMessage(peerId, String.format(QUESTION, question.getQuestion()));
+//        gameRepo.save(game);
+//        Thread answerThread = new Thread(() -> {
+//            try {
+//                Thread.sleep(25000);
+//                messageSender.sendMessage(peerId, String.format(NO_ANSWER, question.getAnswer()));
+//                sendNextQuestion(game, peerId);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//        });
+//        answerThreadMap.put(game, answerThread);
+//        answerThread.start();
+//    }
 
-    public void endGame(Game game, int peerId) {
-//        Lobby lobby = lobbyRepo.findByPeerId(peerId);
-//        lobby.setGame(null);
-//        usersRepo.clearUsersFromGame(game.getId());
-//        gameRepo.delete(game);
+    public void stopGame(Game game, int peerId) {
+        lobbyRepo.clearGameId(game.getId());
+        usersRepo.clearUsersFromGame(game.getId());
+        gameRepo.deleteById(game.getId());
         messageSender.sendMessage(peerId, "GAME ENDED");
     }
 
     public void checkAnswer(Game game, long userId, int peerId, String answer) {
         if (game.getCurrentQuestion().getAnswer().equalsIgnoreCase(answer)) {
-            answerThreadMap.get(game).interrupt();
+            gameSessionMap.get(game).interrupt();
             messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, userId));
-            sendNextQuestion(game, peerId);
+            gameSessionMap.get(game).sendNextQuestion();
         } else {
             messageSender.sendMessage(peerId, String.format(WRONG_ANSWER, userId));
         }

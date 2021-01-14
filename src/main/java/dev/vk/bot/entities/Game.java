@@ -49,8 +49,6 @@ public class Game {
 
     public enum State {
         PREPARING,
-        STARTING,
-        WAIT_QUESTION,
-        WAIT_ANSWER,
+        ALIVE,
     }
 }

@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface LobbyRepository extends CrudRepository<Lobby, Long> {
     Lobby findByPeerId(int peerId);
-    Lobby findByGameId(Long gameId);
 
     @Modifying
+
     @Query(nativeQuery = true, value = "UPDATE lobby set game_id = NULL")
     void clearGameId();
 

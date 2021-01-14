@@ -20,7 +20,7 @@ import java.util.Optional;
 @Controller
 public class UpdateParser {
 
-    private final String REPLY_MSG = "message_reply";
+    private static final String REPLY = "message_reply";
 
     @Autowired
     LobbyRepository lobbyRepo;
@@ -36,7 +36,7 @@ public class UpdateParser {
 
     void parseUpdates(Update[] updates) {
         Arrays.stream(updates)
-                .filter(update -> !update.getType().equals(REPLY_MSG))
+                .filter(update -> !update.getType().equals(REPLY))
                 .forEach(this::parseUpdate);
     }
 
@@ -59,12 +59,7 @@ public class UpdateParser {
     private void parseCommand(long userId, int peerId, String command) {
         Lobby lobby = lobbyRepo.findByPeerId(peerId);
         Optional<Users> userOptional = userRepo.findById(userId);
-        Users user;
-        if (userOptional.isEmpty()) {
-            user = usersService.registerUser(userId);
-        } else {
-            user = userOptional.get();
-        }
+        Users user = usersService.getUserFromOptional(userOptional, userId);
         if (lobby.isGameRunning()) {
             parseGameCmd(lobby.getGame(), user, peerId, command);
         } else {
@@ -86,7 +81,7 @@ public class UpdateParser {
             case ("PREPARING"):
                 updateExecutor.executeGamePrepCmd(game, user.getUserId(), peerId, command);
                 break;
-            case ("STARTING"):
+            case ("ALIVE"):
                 if (game.getId().equals(user.getCurrentGame().getId())) {
                     updateExecutor.executeGameStartingCmd(game, user.getUserId(), peerId, command);
                 }

@@ -20,7 +20,7 @@ public class RepositoryService {
     LobbyRepository lobbyRepo;
 
     @Autowired
-    UsersRepository userRepo;
+    UsersRepository usersRepo;
 
     @Autowired
     GameRepository gameRepo;
@@ -33,7 +33,7 @@ public class RepositoryService {
 
     private void cleanGameDatabase() {
         lobbyRepo.clearGameId();
-        userRepo.clearUsersFromGame();
+        usersRepo.clearUsersFromGame();
         gameRepo.deleteAll();
     }
 }

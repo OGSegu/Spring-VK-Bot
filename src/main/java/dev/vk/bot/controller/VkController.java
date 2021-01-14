@@ -4,27 +4,27 @@ import dev.vk.bot.config.Config;
 import dev.vk.bot.config.LongPoolAPI;
 import dev.vk.bot.response.Event;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 
 @EnableScheduling
-@RestController
 @Slf4j
+@Controller
 public class VkController {
 
-    @Autowired
-    private Config mainConfig;
-    @Autowired
-    private LongPoolAPI longPoolAPI;
+    private final Config mainConfig;
+    private final LongPoolAPI longPoolAPI;
+    private final RestTemplate restTemplate;
+    private final UpdateParser updateParser;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private UpdateParser updateParser;
+    public VkController(Config mainConfig, LongPoolAPI longPoolAPI, RestTemplate restTemplate, UpdateParser updateParser) {
+        this.mainConfig = mainConfig;
+        this.longPoolAPI = longPoolAPI;
+        this.restTemplate = restTemplate;
+        this.updateParser = updateParser;
+    }
 
     @Scheduled(fixedRate = 100)
     public void sendLongPoolRequest() {

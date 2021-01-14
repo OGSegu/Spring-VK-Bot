@@ -7,7 +7,6 @@ import dev.vk.bot.entities.Users;
 import dev.vk.bot.repositories.UsersRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,21 +17,31 @@ import java.util.Optional;
 @Slf4j
 public class UsersService {
 
-    @Autowired
-    UsersRepository usersRepo;
+    private final UsersRepository usersRepo;
+    private final RestTemplate restTemplate;
+    private final Config config;
+    private final UserAPI userAPI;
 
-    @Autowired
-    RestTemplate restTemplate;
-
-    @Autowired
-    Config config;
-
-    @Autowired
-    UserAPI userAPI;
+    public UsersService(UsersRepository usersRepo, RestTemplate restTemplate, Config config, UserAPI userAPI) {
+        this.usersRepo = usersRepo;
+        this.restTemplate = restTemplate;
+        this.config = config;
+        this.userAPI = userAPI;
+    }
 
     public boolean userExists(long userId) {
         Optional<Users> user = usersRepo.findById(userId);
         return user.isPresent();
+    }
+
+    public Users getUserFromOptional(Optional<Users> userOptional, long userId) {
+        Users user;
+        if (userOptional.isEmpty()) {
+            user = registerUser(userId);
+        } else {
+            user = userOptional.get();
+        }
+        return user;
     }
 
     public Users registerUser(long userId) {
