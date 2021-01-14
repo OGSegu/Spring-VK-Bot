@@ -32,9 +32,14 @@ public class Game {
     @OneToOne
     private Question currentQuestion;
 
+    private int questionIterator = 0;
 
-    public Game(int playersAmount, Lobby lobby) {
+    @Column(updatable = false)
+    private int maxQuestion;
+
+    public Game(int playersAmount, int maxQuestion, Lobby lobby) {
         this.playersToStart = playersAmount;
+        this.maxQuestion = maxQuestion;
         this.lobby = lobby;
     }
 

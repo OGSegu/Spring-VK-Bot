@@ -29,18 +29,18 @@ public class GameService {
 
 
     /* ERROR */
-    private static final String ALREADY_IN_GAME = "Вы уже участвуете в игре";
+    public static final String ALREADY_IN_GAME = "Вы уже участвуете в игре";
 
     /* GAME PREPARATION */
-    private static final String GAME_INFO = "------Игра------%nКол-во игроков: %d/%d";
-    private static final String GAME_READY = "Все игроки набраны. Игра начинается!";
+    public static final String GAME_INFO = "------Игра------%nКол-во игроков: %d/%d";
+    public static final String GAME_READY = "Все игроки набраны. Игра начинается!";
 
     /* GAME PROCESS */
-    private static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---\nКоманды:\n/o *ответ* - для того чтобы ответить на вопрос";
-    private static final String QUESTION = "Вопрос:%n%s";
-    private static final String RIGHT_ANSWER = "%d правильно ответил(а) на вопрос. Продолжаем.";
-    private static final String WRONG_ANSWER = "%d неверно ответил(а) на вопрос.";
-    private static final String NO_ANSWER = "Никому не удалось ответить.%nПравильный ответ: %s";
+    public static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---\nКоманды:\n/o *ответ* - для того чтобы ответить на вопрос";
+    public static final String QUESTION = "Вопрос:%n%s";
+    public static final String RIGHT_ANSWER = "%d правильно ответил(а) на вопрос. Продолжаем.";
+    public static final String WRONG_ANSWER = "%d неверно ответил(а) на вопрос.";
+    public static final String NO_ANSWER = "Никому не удалось ответить.%nПравильный ответ: %s";
 
 
     @Autowired
@@ -76,8 +76,8 @@ public class GameService {
         messageSender.sendMessage(peerId, GAME_READY);
     }
 
-    Game createGame(int playersAmount, Lobby lobby) {
-        Game game = new Game(playersAmount, lobby);
+    Game createGame(int playersAmount, int maxQuestions, Lobby lobby) {
+        Game game = new Game(playersAmount, maxQuestions, lobby);
         gameRepo.save(game);
         return game;
     }
@@ -114,6 +114,12 @@ public class GameService {
     }
 
     public void sendNextQuestion(Game game, int peerId) {
+//        int questionIterator = game.getQuestionIterator();
+//        if (questionIterator >= game.getMaxQuestion()) {
+//            endGame(game, peerId);
+//            return;
+//        }
+//        game.setQuestionIterator(++questionIterator);
         Question question = questionRepo.getRandomQuestion();
         game.setCurrentQuestion(question);
         messageSender.sendMessage(peerId, String.format(QUESTION, question.getQuestion()));
@@ -121,20 +127,28 @@ public class GameService {
         Thread answerThread = new Thread(() -> {
             try {
                 Thread.sleep(25000);
+                messageSender.sendMessage(peerId, String.format(NO_ANSWER, question.getAnswer()));
+                sendNextQuestion(game, peerId);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            messageSender.sendMessage(peerId, String.format(NO_ANSWER, question.getAnswer()));
-            sendNextQuestion(game, peerId);
         });
         answerThreadMap.put(game, answerThread);
         answerThread.start();
     }
 
+    public void endGame(Game game, int peerId) {
+//        Lobby lobby = lobbyRepo.findByPeerId(peerId);
+//        lobby.setGame(null);
+//        usersRepo.clearUsersFromGame(game.getId());
+//        gameRepo.delete(game);
+        messageSender.sendMessage(peerId, "GAME ENDED");
+    }
+
     public void checkAnswer(Game game, long userId, int peerId, String answer) {
         if (game.getCurrentQuestion().getAnswer().equalsIgnoreCase(answer)) {
-            messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, userId));
             answerThreadMap.get(game).interrupt();
+            messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, userId));
             sendNextQuestion(game, peerId);
         } else {
             messageSender.sendMessage(peerId, String.format(WRONG_ANSWER, userId));

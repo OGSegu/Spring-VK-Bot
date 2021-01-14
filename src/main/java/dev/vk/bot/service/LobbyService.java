@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @EqualsAndHashCode(callSuper = true)
@@ -39,7 +38,7 @@ public class LobbyService extends VkClient {
         log.info("Lobby was successfully saved");
     }
 
-    public void createGameForLobby(int peerId, int playersAmount) {
+    public void createGameForLobby(int peerId, int playersAmount, int maxQuestions) {
         Lobby lobby = lobbyRepo.findByPeerId(peerId);
         if (lobby == null) {
             messageSender.sendMessage(peerId, NO_LOBBY_FOUND);
@@ -50,7 +49,7 @@ public class LobbyService extends VkClient {
             log.info(lobby.getGame().toString());
             return;
         }
-        Game game = gameService.createGame(playersAmount, lobby);
+        Game game = gameService.createGame(playersAmount, maxQuestions, lobby);
         lobby.setGame(game);
         lobbyRepo.save(lobby);
         gameService.sendStateMsg(game, peerId);

@@ -23,7 +23,7 @@ public class UpdateExecutor {
     private static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
 
     /* CHAT */
-    private static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков*";
+    private static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков* *кол-во вопросов*";
 
     /* PRIVATE */
     public static final String WELCOME = "Привет, с помощью этого бота, ты можешь поиграть в \"Своя Игра\". Для того чтобы начать, добавь бота в беседу";
@@ -63,13 +63,15 @@ public class UpdateExecutor {
         switch (cmdWithArgs[0]) {
             case ("/создать"):
                 int playersAmount;
+                int maxQuestions;
                 try {
                     playersAmount = Integer.parseInt(cmdWithArgs[1]);
-                } catch (NumberFormatException e) {
+                    maxQuestions = Integer.parseInt(cmdWithArgs[2]);
+                } catch (Exception e) {
                     messageSender.sendMessage(peerId, WRONG_ARGS);
                     return;
                 }
-                lobbyService.createGameForLobby(peerId, playersAmount);
+                lobbyService.createGameForLobby(peerId, playersAmount, maxQuestions);
                 break;
             default:
                 messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
