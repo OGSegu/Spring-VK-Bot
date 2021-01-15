@@ -2,6 +2,7 @@ package dev.vk.bot.entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
@@ -23,6 +24,7 @@ public class Game {
     @Column(name = "players_amount")
     private int currentPlayersAmount;
 
+    @ToString.Exclude
     @OneToOne
     private Lobby lobby;
 

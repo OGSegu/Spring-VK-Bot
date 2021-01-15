@@ -1,5 +1,6 @@
 package dev.vk.bot.repositories;
 
+import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Users;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,6 @@ public interface UsersRepository extends CrudRepository<Users, Long> {
     @Modifying
     @Query(nativeQuery = true, value = "UPDATE users set current_game_id = NULL where current_game_id = :id")
     void clearUsersFromGame(@Param("id") long gameId);
+
+    Iterable<Users> findByCurrentGame(Game game);
 }

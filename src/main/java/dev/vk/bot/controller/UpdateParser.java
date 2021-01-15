@@ -60,6 +60,10 @@ public class UpdateParser {
         Lobby lobby = lobbyRepo.findByPeerId(peerId);
         Optional<Users> userOptional = userRepo.findById(userId);
         Users user = usersService.getUserFromOptional(userOptional, userId);
+        if (lobby == null) {
+            parseMainCmd(peerId, command);
+            return;
+        }
         if (lobby.isGameRunning()) {
             parseGameCmd(lobby.getGame(), user, peerId, command);
         } else {

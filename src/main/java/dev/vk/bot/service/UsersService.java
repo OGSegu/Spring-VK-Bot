@@ -46,9 +46,10 @@ public class UsersService {
 
     public Users registerUser(long userId) {
         Users user = new Users(userId);
-        UserInfo.Response userInfo = getUserInfo(userId).getResponse();
-        user.setName(userInfo.getFirstName());
-        user.setSurname(userInfo.getLastName());
+        UserInfo userInfo = getUserInfo(userId);
+        UserInfo.Response body = userInfo.getResponse()[0];
+        user.setName(body.getFirstName());
+        user.setSurname(body.getLastName());
         usersRepo.save(user);
         return user;
     }

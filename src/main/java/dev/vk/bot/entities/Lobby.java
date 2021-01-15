@@ -2,6 +2,7 @@ package dev.vk.bot.entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class Lobby {
     @Column(updatable = false)
     LocalDateTime invitedDate;
 
+    @ToString.Exclude
     @OneToOne
     Game game;
 

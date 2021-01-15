@@ -4,6 +4,7 @@ package dev.vk.bot.controller;
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.service.GameService;
 import dev.vk.bot.service.LobbyService;
+import dev.vk.bot.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,11 +16,12 @@ import java.util.Arrays;
 @Controller
 public class UpdateExecutor {
 
+
     /* EVENT */
     private static final String INVITE_EVENT = "chat_invite_user";
 
     /* ERROR */
-    private static final String UNKNOWN_COMMAND = "Ошибка! Такой команды не существует! Введите /помощь";
+    private static final String UNKNOWN_CMD = "Ошибка! Такой команды не существует! Введите /помощь";
     private static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
 
     /* CHAT */
@@ -31,6 +33,15 @@ public class UpdateExecutor {
     /* OTHER */
     public static final String PONG = "Pong!";
 
+    /* COMMAND */
+    public static final String ANSWER_CMD = "/=";
+    public static final String PARTICIPANT_CMD = "/go";
+    public static final String INFO_CMD = "/i";
+    public static final String START_MSG = "Начать";
+    public static final String PING_CMD = "/ping";
+    public static final String HELP_CMD = "/помощь";
+    public static final String CREATE_CMD = "/создать";
+
     @Autowired
     GameService gameService;
 
@@ -38,22 +49,25 @@ public class UpdateExecutor {
     LobbyService lobbyService;
 
     @Autowired
+    UsersService usersService;
+
+    @Autowired
     MessageSender messageSender;
 
     void executeMainCmd(int peerId, String command) {
         log.info("Executing command: " + command);
         switch (command) {
-            case ("Начать"):
+            case START_MSG:
                 messageSender.sendMessage(peerId, WELCOME);
                 break;
-            case ("/ping"):
+            case PING_CMD:
                 messageSender.sendMessage(peerId, PONG);
                 break;
-            case ("/помощь"):
+            case HELP_CMD:
                 messageSender.sendMessage(peerId, "тест");
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
+                messageSender.sendMessage(peerId, UNKNOWN_CMD);
                 break;
         }
     }
@@ -61,7 +75,7 @@ public class UpdateExecutor {
     void executeMultipleArgsCmd(int peerId, String[] cmdWithArgs) {
         log.info("Executing command: " + Arrays.toString(cmdWithArgs));
         switch (cmdWithArgs[0]) {
-            case ("/создать"):
+            case CREATE_CMD:
                 int playersAmount;
                 int maxQuestions;
                 try {
@@ -74,21 +88,21 @@ public class UpdateExecutor {
                 lobbyService.createGameForLobby(peerId, playersAmount, maxQuestions);
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
+                messageSender.sendMessage(peerId, UNKNOWN_CMD);
                 break;
         }
     }
 
     void executeGamePrepCmd(Game game, long userId, int peerId, String command) {
         switch (command) {
-            case ("/+"):
+            case PARTICIPANT_CMD:
                 gameService.addParticipant(peerId, userId);
                 break;
-            case ("/="):
+            case INFO_CMD:
                 gameService.sendStateMsg(game, peerId);
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
+                messageSender.sendMessage(peerId, UNKNOWN_CMD);
                 break;
         }
     }
@@ -96,11 +110,11 @@ public class UpdateExecutor {
     void executeGameStartingCmd(Game game, long userId, int peerId, String command) {
         String[] cmdWithArgs = command.split(" ");
         switch (cmdWithArgs[0]) {
-            case ("/o"):
+            case (ANSWER_CMD):
                 gameService.checkAnswer(game, userId, peerId, getAnswer(command));
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_COMMAND);
+                messageSender.sendMessage(peerId, UNKNOWN_CMD);
                 break;
         }
     }
