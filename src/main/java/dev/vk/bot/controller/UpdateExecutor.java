@@ -21,12 +21,16 @@ public class UpdateExecutor {
     private static final String INVITE_EVENT = "chat_invite_user";
 
     /* ERROR */
-    private static final String UNKNOWN_CMD = "Ошибка! Такой команды не существует! Введите /помощь";
+    private static final String UNKNOWN_CMD = "Ошибка! Такой команды не существует! Введите %s";
     private static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
 
     /* CHAT */
     private static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков* *кол-во вопросов*";
-
+    public static final String HELP_MSG = "Команды:%n" +
+            "%s *кол-во игроков* *кол-во вопросов* - создать игру%n" +
+            "%s - участвовать в игре%n" +
+            "%s - получить информацию о стадии игры%n" +
+            "%s *ответ* - ответить на вопрос";
     /* PRIVATE */
     public static final String WELCOME = "Привет, с помощью этого бота, ты можешь поиграть в \"Своя Игра\". Для того чтобы начать, добавь бота в беседу";
 
@@ -64,10 +68,10 @@ public class UpdateExecutor {
                 messageSender.sendMessage(peerId, PONG);
                 break;
             case HELP_CMD:
-                messageSender.sendMessage(peerId, "тест");
+                messageSender.sendMessage(peerId, String.format(HELP_MSG, CREATE_CMD, PARTICIPANT_CMD, INFO_CMD, ANSWER_CMD));
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_CMD);
+                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -88,7 +92,7 @@ public class UpdateExecutor {
                 lobbyService.createGameForLobby(peerId, playersAmount, maxQuestions);
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_CMD);
+                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -102,7 +106,7 @@ public class UpdateExecutor {
                 gameService.sendStateMsg(game, peerId);
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_CMD);
+                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -114,7 +118,7 @@ public class UpdateExecutor {
                 gameService.checkAnswer(game, userId, peerId, getAnswer(command));
                 break;
             default:
-                messageSender.sendMessage(peerId, UNKNOWN_CMD);
+                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }

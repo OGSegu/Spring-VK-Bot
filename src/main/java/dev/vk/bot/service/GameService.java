@@ -33,11 +33,11 @@ public class GameService {
     public static final String ALREADY_IN_GAME = "Вы уже участвуете в игре";
 
     /* GAME PREPARATION */
-    public static final String GAME_INFO = "\uD83E\uDD70Игра\uD83E\uDD70%nКол-во игроков: %d/%d";
+    public static final String GAME_INFO = "———Игра———%nКол-во игроков: %d/%d";
     public static final String GAME_READY = "Все игроки набраны. Игра начинается!";
 
     /* GAME PROCESS */
-    public static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---\nКоманды:\n%s *ответ* - для того чтобы ответить на вопрос";
+    public static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---%nКоманды:%n%s *ответ* - для того чтобы ответить на вопрос";
     public static final String QUESTION = "Вопрос:%n%s";
     public static final String RIGHT_ANSWER = "%s правильно ответил(а) на вопрос (%d баллов).";
     public static final String WRONG_ANSWER = "%s неверно ответил(а) на вопрос.";
