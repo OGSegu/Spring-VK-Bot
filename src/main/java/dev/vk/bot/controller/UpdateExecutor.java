@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 
-import java.util.Arrays;
-
 @Slf4j
 @Controller
 public class UpdateExecutor {
@@ -25,11 +23,15 @@ public class UpdateExecutor {
 
     /* CHAT */
     private static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков* *кол-во вопросов*";
-    public static final String HELP_MSG = "Команды:%n" +
+    public static final String HELP_MSG = "-Общие-%n" +
+            "%s - получить информацию о себе%n" +
+            "-Создание игры-%n" +
             "%s *кол-во игроков* *кол-во вопросов* - создать игру%n" +
+            "%s - отменить игру%n" +
             "%s - участвовать в игре%n" +
             "%s - получить информацию о стадии игры%n" +
-            "%s *ответ* - ответить на вопрос";
+            "-Игровой процесс-%n" +
+            "%s *ответ* - ответить на вопрос%n";
     /* PRIVATE */
     public static final String WELCOME = "Привет, с помощью этого бота, ты можешь поиграть в \"Своя Игра\". Для того чтобы начать, добавь бота в беседу";
 
@@ -38,12 +40,14 @@ public class UpdateExecutor {
 
     /* COMMAND */
     public static final String ANSWER_CMD = "/=";
-    public static final String PARTICIPANT_CMD = "/go";
-    public static final String INFO_CMD = "/i";
+    public static final String PARTICIPANT_CMD = "/го";
+    public static final String GAMEINFO_CMD = "/игра";
     public static final String START_MSG = "Начать";
     public static final String PING_CMD = "/ping";
     public static final String HELP_CMD = "/помощь";
     public static final String CREATE_CMD = "/создать";
+    public static final String CANCEL_CMD = "/отмена";
+    public static final String MYINFO_CMD = "/я";
 
     @Autowired
     GameService gameService;
@@ -57,8 +61,7 @@ public class UpdateExecutor {
     @Autowired
     MessageSender messageSender;
 
-    void executeMainCmd(int peerId, String command) {
-        log.info("Executing command: " + command);
+    void executeMainCmd(int peerId, long userId, String command) {
         switch (command) {
             case START_MSG:
                 messageSender.sendMessage(peerId, WELCOME);
@@ -67,7 +70,17 @@ public class UpdateExecutor {
                 messageSender.sendMessage(peerId, PONG);
                 break;
             case HELP_CMD:
-                messageSender.sendMessage(peerId, String.format(HELP_MSG, CREATE_CMD, PARTICIPANT_CMD, INFO_CMD, ANSWER_CMD));
+                messageSender.sendMessage(peerId, String.format(HELP_MSG,
+                        MYINFO_CMD,
+                        CREATE_CMD,
+                        CANCEL_CMD,
+                        PARTICIPANT_CMD,
+                        GAMEINFO_CMD,
+                        ANSWER_CMD)
+                );
+                break;
+            case MYINFO_CMD:
+                messageSender.sendMessage(peerId, usersService.getUserInfoText(userId));
                 break;
             default:
                 messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
@@ -76,7 +89,6 @@ public class UpdateExecutor {
     }
 
     void executeMultipleArgsCmd(int peerId, String[] cmdWithArgs) {
-        log.info("Executing command: " + Arrays.toString(cmdWithArgs));
         switch (cmdWithArgs[0]) {
             case CREATE_CMD:
                 int playersAmount;
@@ -101,8 +113,11 @@ public class UpdateExecutor {
             case PARTICIPANT_CMD:
                 gameService.addParticipant(peerId, userId);
                 break;
-            case INFO_CMD:
+            case GAMEINFO_CMD:
                 gameService.sendStateMsg(game, peerId);
+                break;
+            case CANCEL_CMD:
+                gameService.cancelGame(game.getId(), peerId);
                 break;
             default:
                 messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));

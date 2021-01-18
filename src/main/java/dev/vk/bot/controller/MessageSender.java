@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -15,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MessageSender {
 
 
-    private final ThreadLocalRandom random = ThreadLocalRandom.current();
+    private final Random random = new Random();
 
     @Autowired
     private Config config;
@@ -35,6 +36,7 @@ public class MessageSender {
                 config.getToken(),
                 config.getVersion()
         );
+        log.info(apiRequest);
         String response = restTemplate.getForObject(apiRequest, String.class);
         log.info("Message sent. Received: " + response);
     }

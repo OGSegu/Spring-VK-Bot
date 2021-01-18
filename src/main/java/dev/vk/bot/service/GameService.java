@@ -35,6 +35,7 @@ public class GameService {
     /* GAME PREPARATION */
     public static final String GAME_INFO = "———Игра———%nКол-во игроков: %d/%d";
     public static final String GAME_READY = "Все игроки набраны. Игра начинается!";
+    public static final String GAME_CANCELED = "Игра была отменена.";
 
     /* GAME PROCESS */
     public static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---%nКоманды:%n%s *ответ* - для того чтобы ответить на вопрос";
@@ -124,10 +125,32 @@ public class GameService {
     public void stopGame(Game game, int peerId) {
         GameSession gameSession = gameSessionMap.get(game);
         messageSender.sendMessage(peerId, gameSession.getResult());
-        lobbyRepo.clearGameId(game.getId());
-        usersRepo.clearUsersFromGame(game.getId());
-        gameRepo.deleteById(game.getId());
+        addPointsToUsers(gameSession);
+        clearDbFromGame(game.getId());
         gameSessionMap.remove(game);
+    }
+
+    private void addPointsToUser(Users user, int points) {
+        int currentElo = user.getElo();
+        user.setElo(currentElo + points);
+        usersRepo.save(user);
+    }
+
+    private void addPointsToUsers(GameSession gameSession) {
+        for (Map.Entry<Users, Integer> userEntry : gameSession.getScoreMap().entrySet()) {
+            addPointsToUser(userEntry.getKey(), userEntry.getValue());
+        }
+    }
+
+    public void cancelGame(long gameId, int peerId) {
+        messageSender.sendMessage(peerId, GAME_CANCELED);
+        clearDbFromGame(gameId);
+    }
+
+    public void clearDbFromGame(long gameId) {
+        lobbyRepo.clearGameId(gameId);
+        usersRepo.clearUsersFromGame(gameId);
+        gameRepo.deleteById(gameId);
     }
 
     public void checkAnswer(Game game, long userId, int peerId, String answer) {
@@ -136,11 +159,11 @@ public class GameService {
         Users user = usersService.getUserFromOptional(userOptional, userId);
         if (currentQuestion != null && currentQuestion.getAnswer().equalsIgnoreCase(answer)) {
             GameSession gameSession = gameSessionMap.get(game);
-            messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, user.getName(), RIGHT_ANSWER_RATE));
-            gameSession.interrupt();
             Map<Users, Integer> scoreMap = gameSession.getScoreMap();
-            int scoreRightAnswerUser = scoreMap.get(user);
-            scoreMap.put(user, scoreRightAnswerUser + RIGHT_ANSWER_RATE);
+            int currentScore = scoreMap.get(user) + RIGHT_ANSWER_RATE;
+            scoreMap.put(user, currentScore);
+            messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, user.getName(), currentScore));
+            gameSession.interrupt();
         } else {
             messageSender.sendMessage(peerId, String.format(WRONG_ANSWER, user.getName()));
         }

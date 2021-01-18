@@ -61,20 +61,20 @@ public class UpdateParser {
         Optional<Users> userOptional = userRepo.findById(userId);
         Users user = usersService.getUserFromOptional(userOptional, userId);
         if (lobby == null) {
-            parseMainCmd(peerId, command);
+            parseMainCmd(peerId, userId, command);
             return;
         }
         if (lobby.isGameRunning()) {
             parseGameCmd(lobby.getGame(), user, peerId, command);
         } else {
-            parseMainCmd(peerId, command);
+            parseMainCmd(peerId, userId, command);
         }
     }
 
-    private void parseMainCmd(int peerId, String command) {
+    private void parseMainCmd(int peerId, long userId,  String command) {
         String[] cmdWithArgs = command.split(" ");
         if (cmdWithArgs.length <= 1) {
-            updateExecutor.executeMainCmd(peerId, command);
+            updateExecutor.executeMainCmd(peerId, userId, command);
         } else {
             updateExecutor.executeMultipleArgsCmd(peerId, cmdWithArgs);
         }
