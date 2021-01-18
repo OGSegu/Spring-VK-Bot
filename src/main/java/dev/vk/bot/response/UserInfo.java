@@ -1,4 +1,4 @@
-package dev.vk.bot.entities;
+package dev.vk.bot.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

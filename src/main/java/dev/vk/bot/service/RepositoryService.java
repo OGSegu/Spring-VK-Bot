@@ -25,15 +25,16 @@ public class RepositoryService {
     @Autowired
     GameRepository gameRepo;
 
-//    @PostConstruct
-//    void init() {
-//        log.info("Cleaning database before starting");
-//        cleanGameDatabase();
-//    }
-//
-//    private void cleanGameDatabase() {
-//        lobbyRepo.clearGameId();
-//        usersRepo.clearUsersFromGame();
-//        gameRepo.deleteAll();
-//    }
+    @PostConstruct
+    void init() {
+        log.info("Cleaning database before starting");
+        cleanGameDatabase();
+    }
+
+    private void cleanGameDatabase() {
+        lobbyRepo.clearGameId();
+        usersRepo.clearUsersFromGame();
+        gameRepo.deleteAll();
+    }
+
 }

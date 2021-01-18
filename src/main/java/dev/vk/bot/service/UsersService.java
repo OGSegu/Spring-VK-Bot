@@ -2,7 +2,7 @@ package dev.vk.bot.service;
 
 import dev.vk.bot.config.Config;
 import dev.vk.bot.config.UserAPI;
-import dev.vk.bot.entities.UserInfo;
+import dev.vk.bot.response.UserInfo;
 import dev.vk.bot.entities.Users;
 import dev.vk.bot.repositories.UsersRepository;
 import lombok.Data;

@@ -44,7 +44,6 @@ public class GameSession extends Thread {
         addUsersInScoreMap(usersIterable);
         int maxQuestionAmount = game.getMaxQuestion();
         while (questionIterator.get() < maxQuestionAmount) {
-            log.info("Iterator: " + questionIterator);
             try {
                 Thread.sleep(1500);
                 sendNextQuestion();

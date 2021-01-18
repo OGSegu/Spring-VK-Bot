@@ -16,7 +16,6 @@ import java.util.Arrays;
 @Controller
 public class UpdateExecutor {
 
-
     /* EVENT */
     private static final String INVITE_EVENT = "chat_invite_user";
 
@@ -133,6 +132,9 @@ public class UpdateExecutor {
             case (INVITE_EVENT):
                 messageSender.sendMessage(peerId, WELCOME_IN_CHAT);
                 lobbyService.createLobby(peerId);
+                break;
+            default:
+                log.info("Unknown event was received");
                 break;
         }
     }
