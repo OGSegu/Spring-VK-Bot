@@ -32,9 +32,9 @@ public class MessageSender {
                 config.getToken(),
                 config.getVersion()
         );
-        log.debug(apiRequest);
         String response = restTemplate.getForObject(apiRequest, String.class);
-        log.debug("Message sent. Received: " + response);
+        String logMsg = "API request: %s%nMessage was sent. Response: %s";
+        log.debug(String.format(logMsg, apiRequest, response));
     }
 
     @Bean
