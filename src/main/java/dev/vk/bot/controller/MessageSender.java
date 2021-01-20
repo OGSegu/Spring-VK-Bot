@@ -8,16 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Component
 public class MessageSender {
-
-
-    private final Random random = new Random();
-
+    
     @Autowired
     private Config config;
 
@@ -30,7 +26,7 @@ public class MessageSender {
     public void sendMessage(int peerId, String msg) {
         String apiRequest = String.format(messageAPI.getSendMessageAPI(),
                 peerId,
-                random.nextInt(),
+                ThreadLocalRandom.current().nextInt(),
                 msg,
                 config.getGroupId(),
                 config.getToken(),

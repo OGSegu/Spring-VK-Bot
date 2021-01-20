@@ -39,9 +39,9 @@ public class GameService {
 
     /* GAME PROCESS */
     public static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---%nКоманды:%n%s *ответ* - для того чтобы ответить на вопрос";
-    public static final String QUESTION = "Вопрос:%n%s";
-    public static final String RIGHT_ANSWER = "%s правильно ответил(а) на вопрос (%d баллов).";
-    public static final String WRONG_ANSWER = "%s неверно ответил(а) на вопрос.";
+    public static final String QUESTION = "❓ Вопрос:%n%s";
+    public static final String RIGHT_ANSWER = "✅ %s правильно ответил(а) на вопрос (%d баллов).";
+    public static final String WRONG_ANSWER = "\uD83D\uDEAB %s неверно ответил(а) на вопрос.";
     public static final String NO_ANSWER = "Никому не удалось ответить.%nПравильный ответ: %s";
     public static final int RIGHT_ANSWER_RATE = 25;
 
