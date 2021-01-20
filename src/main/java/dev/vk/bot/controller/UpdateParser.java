@@ -1,41 +1,26 @@
 package dev.vk.bot.controller;
 
-import dev.vk.bot.component.MessageSender;
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Lobby;
 import dev.vk.bot.entities.Users;
-import dev.vk.bot.game.service.GameService;
-import dev.vk.bot.lobby.service.LobbyService;
-import dev.vk.bot.repositories.UsersRepository;
 import dev.vk.bot.response.Update;
 import dev.vk.bot.response.Update.ReceivedObject.Message.Action;
-import dev.vk.bot.service.UsersService;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-@EqualsAndHashCode(callSuper = true)
 @Slf4j
 @org.springframework.stereotype.Controller
-public class UpdateParser extends Controller {
+public class UpdateParser {
 
     private static final String REPLY = "message_reply";
 
+    private final Controller controller;
     private final UpdateExecutor updateExecutor;
 
-    public UpdateParser(GameService gameService, LobbyService lobbyService,
-                        UsersService usersService, MessageSender messageSender,
-                        UpdateExecutor updateExecutor, UsersRepository usersRepo) {
-        super(Controller.builder()
-                .gameService(gameService)
-                .lobbyService(lobbyService)
-                .usersService(usersService)
-                .messageSender(messageSender)
-                .usersRepo(usersRepo)
-                .build()
-        );
+    public UpdateParser(Controller controller, UpdateExecutor updateExecutor) {
+        this.controller = controller;
         this.updateExecutor = updateExecutor;
     }
 
@@ -49,8 +34,8 @@ public class UpdateParser extends Controller {
         Action action = update.getData().getMessage().getAction();
         int peerId = update.getData().getMessage().getPeerId();
         int userId = update.getData().getMessage().getFromId();
-        if (!usersService.userExists(userId)) {
-            usersService.registerUser(userId);
+        if (!controller.usersService.userExists(userId)) {
+            controller.usersService.registerUser(userId);
         }
         String command = update.getData().getMessage().getText();
         if (action != null) {
@@ -62,9 +47,9 @@ public class UpdateParser extends Controller {
 
 
     private void parseCommand(long userId, int peerId, String command) {
-        Lobby lobby = lobbyRepo.findByPeerId(peerId);
-        Optional<Users> userOptional = usersRepo.findById(userId);
-        Users user = usersService.getUserFromOptional(userOptional, userId);
+        Lobby lobby = controller.lobbyRepo.findByPeerId(peerId);
+        Optional<Users> userOptional = controller.usersRepo.findById(userId);
+        Users user = controller.usersService.getUserFromOptional(userOptional, userId);
         if (lobby == null) {
             parseMainCmd(peerId, userId, command);
             return;

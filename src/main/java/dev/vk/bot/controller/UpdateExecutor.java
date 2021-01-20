@@ -1,18 +1,14 @@
 package dev.vk.bot.controller;
 
 
-import dev.vk.bot.component.MessageSender;
 import dev.vk.bot.entities.Game;
-import dev.vk.bot.game.service.GameService;
-import dev.vk.bot.lobby.service.LobbyService;
-import dev.vk.bot.service.UsersService;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
-@EqualsAndHashCode(callSuper = true)
 @Slf4j
 @org.springframework.stereotype.Controller
-public class UpdateExecutor extends Controller {
+public class UpdateExecutor {
+
+    private final Controller controller;
 
     /* EVENT */
     private static final String INVITE_EVENT = "chat_invite_user";
@@ -49,27 +45,20 @@ public class UpdateExecutor extends Controller {
     public static final String CANCEL_CMD = "/отмена";
     public static final String MYINFO_CMD = "/я";
 
-    public UpdateExecutor(GameService gameService, LobbyService lobbyService,
-                          UsersService usersService, MessageSender messageSender) {
-        super(Controller.builder()
-                .gameService(gameService)
-                .lobbyService(lobbyService)
-                .usersService(usersService)
-                .messageSender(messageSender)
-                .build()
-        );
+    public UpdateExecutor(Controller controller) {
+        this.controller = controller;
     }
 
     void executeMainCmd(int peerId, long userId, String command) {
         switch (command) {
             case START_MSG:
-                messageSender.sendMessage(peerId, WELCOME);
+                controller.messageSender.sendMessage(peerId, WELCOME);
                 break;
             case PING_CMD:
-                messageSender.sendMessage(peerId, PONG);
+                controller.messageSender.sendMessage(peerId, PONG);
                 break;
             case HELP_CMD:
-                messageSender.sendMessage(peerId, String.format(HELP_MSG,
+                controller.messageSender.sendMessage(peerId, String.format(HELP_MSG,
                         MYINFO_CMD,
                         CREATE_CMD,
                         CANCEL_CMD,
@@ -79,10 +68,10 @@ public class UpdateExecutor extends Controller {
                 );
                 break;
             case MYINFO_CMD:
-                messageSender.sendMessage(peerId, usersService.getUserInfoText(userId));
+                controller.messageSender.sendMessage(peerId, controller.usersService.getUserInfoText(userId));
                 break;
             default:
-                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
+                controller.messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -96,13 +85,13 @@ public class UpdateExecutor extends Controller {
                     playersAmount = Integer.parseInt(cmdWithArgs[1]);
                     maxQuestions = Integer.parseInt(cmdWithArgs[2]);
                 } catch (Exception e) {
-                    messageSender.sendMessage(peerId, WRONG_ARGS);
+                    controller.messageSender.sendMessage(peerId, WRONG_ARGS);
                     return;
                 }
-                lobbyService.createGameForLobby(peerId, playersAmount, maxQuestions);
+                controller.lobbyService.createGameForLobby(peerId, playersAmount, maxQuestions);
                 break;
             default:
-                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
+                controller.messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -110,16 +99,16 @@ public class UpdateExecutor extends Controller {
     void executeGamePrepCmd(Game game, long userId, int peerId, String command) {
         switch (command) {
             case PARTICIPANT_CMD:
-                gameService.addParticipant(peerId, userId);
+                controller.gameService.addParticipant(peerId, userId);
                 break;
             case GAMEINFO_CMD:
-                gameService.sendStateMsg(game, peerId);
+                controller.gameService.sendStateMsg(game, peerId);
                 break;
             case CANCEL_CMD:
-                gameService.cancelGame(game.getId(), peerId);
+                controller.gameService.cancelGame(game.getId(), peerId);
                 break;
             default:
-                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
+                controller.messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -128,10 +117,10 @@ public class UpdateExecutor extends Controller {
         String[] cmdWithArgs = command.split(" ");
         switch (cmdWithArgs[0]) {
             case (ANSWER_CMD):
-                gameService.checkAnswer(game, userId, peerId, getAnswer(command));
+                controller.gameService.checkAnswer(game, userId, peerId, getAnswer(command));
                 break;
             default:
-                messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
+                controller.messageSender.sendMessage(peerId, String.format(UNKNOWN_CMD, HELP_CMD));
                 break;
         }
     }
@@ -144,8 +133,8 @@ public class UpdateExecutor extends Controller {
         log.debug("Executing action: " + actionType);
         switch (actionType) {
             case (INVITE_EVENT):
-                messageSender.sendMessage(peerId, WELCOME_IN_CHAT);
-                lobbyService.createLobby(peerId);
+                controller.messageSender.sendMessage(peerId, WELCOME_IN_CHAT);
+                controller.lobbyService.createLobby(peerId);
                 break;
             default:
                 log.info("Unknown event was received");
