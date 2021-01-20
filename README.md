@@ -1,3 +1,5 @@
+![Build](https://github.com/OGSegu/VK-Quiz-Bot/workflows/Build/badge.svg)
+
 # Quiz VK Bot
 
 ### Installation
