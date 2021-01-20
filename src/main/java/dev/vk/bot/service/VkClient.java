@@ -5,7 +5,6 @@ import dev.vk.bot.config.LongPoolAPI;
 import dev.vk.bot.response.LongPool;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,14 +15,17 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class VkClient {
 
-    @Autowired
-    protected RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
+    private final Config mainConfig;
+    private final LongPoolAPI longPoolConfig;
+    private final LobbyValidator lobbyValidator;
 
-    @Autowired
-    protected Config mainConfig;
-
-    @Autowired
-    protected LongPoolAPI longPoolConfig;
+    public VkClient(RestTemplate restTemplate, Config mainConfig, LongPoolAPI longPoolConfig, LobbyValidator lobbyValidator) {
+        this.restTemplate = restTemplate;
+        this.mainConfig = mainConfig;
+        this.longPoolConfig = longPoolConfig;
+        this.lobbyValidator = lobbyValidator;
+    }
 
     @PostConstruct
     void init() {

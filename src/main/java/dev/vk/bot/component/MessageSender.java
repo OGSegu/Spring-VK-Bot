@@ -4,12 +4,16 @@ import dev.vk.bot.config.Config;
 import dev.vk.bot.config.MessageAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+@EnableAsync
 @Slf4j
 @Component
 public class MessageSender {
@@ -21,8 +25,10 @@ public class MessageSender {
     private MessageAPI messageAPI;
 
     @Autowired
+    @Qualifier("message")
     private RestTemplate restTemplate;
 
+    @Async
     public void sendMessage(int peerId, String msg) {
         String apiRequest = String.format(messageAPI.getSendMessageAPI(),
                 peerId,

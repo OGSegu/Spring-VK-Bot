@@ -63,7 +63,6 @@ public class GameService {
         this.usersService = usersService;
     }
 
-
     public Game getGame(int peerId) {
         return lobbyRepo.findByPeerId(peerId).getGame();
     }

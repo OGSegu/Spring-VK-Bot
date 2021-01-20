@@ -18,7 +18,7 @@ public class UpdateExecutor {
     private static final String WRONG_ARGS = "Ошибка! Аргументы были введены неверно";
 
     /* CHAT */
-    private static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков* *кол-во вопросов*";
+    public static final String WELCOME_IN_CHAT = "Спасибо за приглашение! Предлагаю вам сыграть в викторину.\n Для того чтобы начать введите /создать *кол-во игроков* *кол-во вопросов*";
     public static final String HELP_MSG = "-Общие-%n" +
             "%s - получить информацию о себе%n" +
             "-Создание игры-%n" +
@@ -133,7 +133,6 @@ public class UpdateExecutor {
         log.debug("Executing action: " + actionType);
         switch (actionType) {
             case (INVITE_EVENT):
-                controller.messageSender.sendMessage(peerId, WELCOME_IN_CHAT);
                 controller.lobbyService.createLobby(peerId);
                 break;
             default:

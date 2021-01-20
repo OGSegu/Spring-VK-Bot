@@ -51,7 +51,6 @@ public class UpdateParser {
         Optional<Users> userOptional = controller.usersRepo.findById(userId);
         Users user = controller.usersService.getUserFromOptional(userOptional, userId);
         if (lobby == null) {
-            parseMainCmd(peerId, userId, command);
             return;
         }
         if (lobby.isGameRunning()) {
