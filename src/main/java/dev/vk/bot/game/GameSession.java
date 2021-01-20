@@ -1,9 +1,9 @@
-package dev.vk.bot.session;
+package dev.vk.bot.game;
 
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Question;
 import dev.vk.bot.entities.Users;
-import dev.vk.bot.service.GameService;
+import dev.vk.bot.game.service.GameService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static dev.vk.bot.service.GameService.NO_ANSWER;
-import static dev.vk.bot.service.GameService.QUESTION;
+import static dev.vk.bot.game.service.GameService.NO_ANSWER;
+import static dev.vk.bot.game.service.GameService.QUESTION;
 
 @Slf4j
 @Data

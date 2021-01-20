@@ -6,7 +6,6 @@ import dev.vk.bot.repositories.LobbyRepository;
 import dev.vk.bot.repositories.UsersRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -16,18 +15,19 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class RepositoryService {
 
-    @Autowired
-    LobbyRepository lobbyRepo;
+    final LobbyRepository lobbyRepo;
+    final UsersRepository usersRepo;
+    final GameRepository gameRepo;
 
-    @Autowired
-    UsersRepository usersRepo;
-
-    @Autowired
-    GameRepository gameRepo;
+    public RepositoryService(LobbyRepository lobbyRepo, UsersRepository usersRepo, GameRepository gameRepo) {
+        this.lobbyRepo = lobbyRepo;
+        this.usersRepo = usersRepo;
+        this.gameRepo = gameRepo;
+    }
 
     @PostConstruct
     void init() {
-        log.info("Cleaning database before starting");
+        log.debug("Cleaning database before starting");
         cleanGameDatabase();
     }
 

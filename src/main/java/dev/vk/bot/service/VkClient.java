@@ -31,13 +31,13 @@ public class VkClient {
     }
 
     public void getLongPoolServer() {
-        log.info("Trying to get long pool server");
+        log.debug("Trying to get long pool server");
         String apiRequest = String.format(longPoolConfig.getLongPoolServerGetterAPI(),
                 mainConfig.getGroupId(),
                 mainConfig.getToken(),
                 mainConfig.getVersion()
         );
-        log.info("API REQUEST: " + apiRequest);
+        log.debug("API REQUEST: " + apiRequest);
         LongPool longPool = restTemplate.getForObject(apiRequest, LongPool.class);
         if (longPool == null || longPool.getResponse() == null) {
             log.info("Can't get long pool server");

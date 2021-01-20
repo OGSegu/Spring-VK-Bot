@@ -1,18 +1,18 @@
 package dev.vk.bot.controller;
 
 
+import dev.vk.bot.component.MessageSender;
 import dev.vk.bot.entities.Game;
-import dev.vk.bot.service.GameService;
-import dev.vk.bot.service.LobbyService;
+import dev.vk.bot.game.service.GameService;
+import dev.vk.bot.lobby.service.LobbyService;
 import dev.vk.bot.service.UsersService;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Controller;
 
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
-@Controller
-public class UpdateExecutor {
+@org.springframework.stereotype.Controller
+public class UpdateExecutor extends Controller {
 
     /* EVENT */
     private static final String INVITE_EVENT = "chat_invite_user";
@@ -49,17 +49,16 @@ public class UpdateExecutor {
     public static final String CANCEL_CMD = "/отмена";
     public static final String MYINFO_CMD = "/я";
 
-    @Autowired
-    GameService gameService;
-
-    @Autowired
-    LobbyService lobbyService;
-
-    @Autowired
-    UsersService usersService;
-
-    @Autowired
-    MessageSender messageSender;
+    public UpdateExecutor(GameService gameService, LobbyService lobbyService,
+                          UsersService usersService, MessageSender messageSender) {
+        super(Controller.builder()
+                .gameService(gameService)
+                .lobbyService(lobbyService)
+                .usersService(usersService)
+                .messageSender(messageSender)
+                .build()
+        );
+    }
 
     void executeMainCmd(int peerId, long userId, String command) {
         switch (command) {
@@ -142,7 +141,7 @@ public class UpdateExecutor {
     }
 
     void executeAction(int peerId, String actionType) {
-        log.info("Executing action: " + actionType);
+        log.debug("Executing action: " + actionType);
         switch (actionType) {
             case (INVITE_EVENT):
                 messageSender.sendMessage(peerId, WELCOME_IN_CHAT);
@@ -152,10 +151,5 @@ public class UpdateExecutor {
                 log.info("Unknown event was received");
                 break;
         }
-    }
-
-    @Bean
-    public UpdateExecutor getCommandExecutor() {
-        return new UpdateExecutor();
     }
 }

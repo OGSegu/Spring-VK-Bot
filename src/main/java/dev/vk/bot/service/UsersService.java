@@ -60,9 +60,9 @@ public class UsersService {
                 config.getToken(),
                 config.getVersion()
         );
-        log.info("USER API: " + request);
+        log.debug("USER API: " + request);
         UserInfo userInfo = restTemplate.getForObject(request, UserInfo.class);
-        log.info("Received userInfo: " + userInfo);
+        log.debug("Received userInfo: " + userInfo);
         return userInfo;
     }
 

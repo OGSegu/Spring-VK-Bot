@@ -28,15 +28,15 @@ public class VkController {
 
     @Scheduled(fixedRate = 100)
     public void sendLongPoolRequest() {
-        log.info("Sending long pool request");
+        log.debug("Sending long pool request");
         String apiRequest = String.format(longPoolAPI.getLongPoolServerRequest(),
                 mainConfig.getLongPoolServer(),
                 mainConfig.getKey(),
                 mainConfig.getTs()
         );
-        log.info(apiRequest);
+        log.debug("Long pool API request: " + apiRequest);
         Event longPoolResponse = restTemplate.getForObject(apiRequest, Event.class);
-        log.info("Long pool received: " + longPoolResponse);
+        log.debug("Long pool received: " + longPoolResponse);
         if (longPoolResponse == null || longPoolResponse.getUpdates() == null) {
             log.warn("Long pool is null");
             return;

@@ -1,16 +1,17 @@
-package dev.vk.bot.service;
+package dev.vk.bot.game.service;
 
-import dev.vk.bot.controller.MessageSender;
+import dev.vk.bot.component.MessageSender;
 import dev.vk.bot.controller.UpdateExecutor;
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Lobby;
 import dev.vk.bot.entities.Question;
 import dev.vk.bot.entities.Users;
+import dev.vk.bot.game.GameSession;
 import dev.vk.bot.repositories.GameRepository;
 import dev.vk.bot.repositories.LobbyRepository;
 import dev.vk.bot.repositories.QuestionRepository;
 import dev.vk.bot.repositories.UsersRepository;
-import dev.vk.bot.session.GameSession;
+import dev.vk.bot.service.UsersService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class GameService {
         messageSender.sendMessage(peerId, GAME_READY);
     }
 
-    Game createGame(int playersAmount, int maxQuestions, Lobby lobby) {
+    public Game createGame(int playersAmount, int maxQuestions, Lobby lobby) {
         Game game = new Game(playersAmount, maxQuestions, lobby);
         gameRepo.save(game);
         return game;

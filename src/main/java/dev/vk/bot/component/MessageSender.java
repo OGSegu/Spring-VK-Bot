@@ -1,4 +1,4 @@
-package dev.vk.bot.controller;
+package dev.vk.bot.component;
 
 import dev.vk.bot.config.Config;
 import dev.vk.bot.config.MessageAPI;
@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @Component
 public class MessageSender {
-    
+
     @Autowired
     private Config config;
 
@@ -32,9 +32,9 @@ public class MessageSender {
                 config.getToken(),
                 config.getVersion()
         );
-        log.info(apiRequest);
+        log.debug(apiRequest);
         String response = restTemplate.getForObject(apiRequest, String.class);
-        log.info("Message sent. Received: " + response);
+        log.debug("Message sent. Received: " + response);
     }
 
     @Bean

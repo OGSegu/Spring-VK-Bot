@@ -1,38 +1,43 @@
 package dev.vk.bot.controller;
 
+import dev.vk.bot.component.MessageSender;
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Lobby;
 import dev.vk.bot.entities.Users;
-import dev.vk.bot.repositories.LobbyRepository;
+import dev.vk.bot.game.service.GameService;
+import dev.vk.bot.lobby.service.LobbyService;
 import dev.vk.bot.repositories.UsersRepository;
 import dev.vk.bot.response.Update;
 import dev.vk.bot.response.Update.ReceivedObject.Message.Action;
 import dev.vk.bot.service.UsersService;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Controller;
 
 import java.util.Arrays;
 import java.util.Optional;
 
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
-@Controller
-public class UpdateParser {
+@org.springframework.stereotype.Controller
+public class UpdateParser extends Controller {
 
     private static final String REPLY = "message_reply";
 
-    @Autowired
-    LobbyRepository lobbyRepo;
+    private final UpdateExecutor updateExecutor;
 
-    @Autowired
-    UsersRepository userRepo;
-
-    @Autowired
-    UsersService usersService;
-
-    @Autowired
-    UpdateExecutor updateExecutor;
+    public UpdateParser(GameService gameService, LobbyService lobbyService,
+                        UsersService usersService, MessageSender messageSender,
+                        UpdateExecutor updateExecutor, UsersRepository usersRepo) {
+        super(Controller.builder()
+                .gameService(gameService)
+                .lobbyService(lobbyService)
+                .usersService(usersService)
+                .messageSender(messageSender)
+                .usersRepo(usersRepo)
+                .build()
+        );
+        this.updateExecutor = updateExecutor;
+    }
 
     void parseUpdates(Update[] updates) {
         Arrays.stream(updates)
@@ -58,7 +63,7 @@ public class UpdateParser {
 
     private void parseCommand(long userId, int peerId, String command) {
         Lobby lobby = lobbyRepo.findByPeerId(peerId);
-        Optional<Users> userOptional = userRepo.findById(userId);
+        Optional<Users> userOptional = usersRepo.findById(userId);
         Users user = usersService.getUserFromOptional(userOptional, userId);
         if (lobby == null) {
             parseMainCmd(peerId, userId, command);
@@ -91,14 +96,8 @@ public class UpdateParser {
                 }
                 break;
             default:
-                log.info("Something went wrong");
+                log.info("Unknown event was received");
                 break;
         }
-    }
-
-
-    @Bean
-    public UpdateParser getCommandParser() {
-        return new UpdateParser();
     }
 }
