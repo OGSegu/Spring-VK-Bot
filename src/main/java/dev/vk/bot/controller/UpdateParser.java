@@ -1,5 +1,6 @@
 package dev.vk.bot.controller;
 
+import dev.vk.bot.config.Config;
 import dev.vk.bot.entities.Game;
 import dev.vk.bot.entities.Lobby;
 import dev.vk.bot.entities.Users;
@@ -17,10 +18,12 @@ public class UpdateParser {
     private static final String REPLY = "message_reply";
 
     private final Controller controller;
+    private final Config mainConfig;
     private final UpdateExecutor updateExecutor;
 
-    public UpdateParser(Controller controller, UpdateExecutor updateExecutor) {
+    public UpdateParser(Controller controller, Config mainConfig, UpdateExecutor updateExecutor) {
         this.controller = controller;
+        this.mainConfig = mainConfig;
         this.updateExecutor = updateExecutor;
     }
 
@@ -38,7 +41,8 @@ public class UpdateParser {
             controller.usersService.registerUser(userId);
         }
         String command = update.getData().getMessage().getText();
-        if (action != null) {
+        if (action != null && action.getMemberId() == mainConfig.getGroupId() * -1) {
+            log.info("ACTION: " + action.toString());
             updateExecutor.executeAction(peerId, action.getType());
         } else if (update.getData().getMessage().getText().startsWith("/")) {
             parseCommand(userId, peerId, command);
