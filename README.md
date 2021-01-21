@@ -1,3 +1,4 @@
+![Build](https://github.com/OGSegu/University_Research/workflows/Java/badge.svg)
 # Quiz VK Bot
 
 ### Installation

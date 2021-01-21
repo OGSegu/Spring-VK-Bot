@@ -21,15 +21,15 @@ import static dev.vk.bot.game.service.GameService.QUESTION;
 @Data
 public class GameSession extends Thread {
 
-    Map<Users, Integer> scoreMap = new HashMap<>();
-
     private final GameService gameService;
+
+    private Map<Users, Integer> scoreMap = new HashMap<>();
+    private Map<Users, Integer> eloMap;
 
     private final Game game;
     private final int peerId;
     private final Iterable<Users> usersIterable;
-
-    AtomicInteger questionIterator;
+    private AtomicInteger questionIterator;
 
     public GameSession(GameService gameService, Game game, int peerId, Iterable<Users> usersIterable) {
         this.gameService = gameService;
@@ -71,17 +71,19 @@ public class GameSession extends Thread {
     public String getResult() {
         StringBuilder sb = new StringBuilder("--- Результаты ---\n");
         int counter = 1;
-        Map<Users, Integer> sorted = scoreMap.entrySet().stream()
+        scoreMap = scoreMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-        for (Map.Entry<Users, Integer> result : sorted.entrySet()) {
+        eloMap = gameService.getEloForGame(scoreMap);
+        for (Map.Entry<Users, Integer> result : scoreMap.entrySet()) {
             sb.append(counter++)
                     .append(". ")
                     .append(result.getKey().getName())
-                    .append(" - ")
-                    .append(result.getValue())
-                    .append(" баллов\n");
+                    .append(" | ")
+                    .append(eloMap.get(result.getKey()) >= 0 ? "➕" : "➖")
+                    .append(Math.abs(eloMap.get(result.getKey())))
+                    .append("\n");
         }
         return sb.toString();
     }

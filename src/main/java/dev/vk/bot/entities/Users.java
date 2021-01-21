@@ -1,5 +1,6 @@
 package dev.vk.bot.entities;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
@@ -20,7 +21,7 @@ public class Users {
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
-    private int elo = 0;
+    private int elo = 400;
 
     @ManyToOne
     private Game currentGame = null;

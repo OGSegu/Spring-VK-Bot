@@ -7,6 +7,7 @@ import dev.vk.bot.entities.Lobby;
 import dev.vk.bot.entities.Question;
 import dev.vk.bot.entities.Users;
 import dev.vk.bot.game.GameSession;
+import dev.vk.bot.rating.EloSystem;
 import dev.vk.bot.repositories.GameRepository;
 import dev.vk.bot.repositories.LobbyRepository;
 import dev.vk.bot.repositories.QuestionRepository;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,11 +43,12 @@ public class GameService {
     /* GAME PROCESS */
     public static final String WELCOME_TO_GAME = "--- Добро пожаловать на викторину ---%nКоманды:%n%s *ответ* - для того чтобы ответить на вопрос";
     public static final String QUESTION = "❓ Вопрос:%n%s";
-    public static final String RIGHT_ANSWER = "✅ %s правильно ответил(а) на вопрос (%d баллов).";
+    public static final String RIGHT_ANSWER = "✅ %s правильно ответил(а) на вопрос.";
     public static final String WRONG_ANSWER = "\uD83D\uDEAB %s неверно ответил(а) на вопрос.";
     public static final String NO_ANSWER = "Никому не удалось ответить.%nПравильный ответ: %s";
-    public static final int RIGHT_ANSWER_RATE = 25;
+    public static final int RIGHT_ANSWER_RATE = 1;
 
+    private final EloSystem eloSystem;
 
     private final LobbyRepository lobbyRepo;
     private final GameRepository gameRepo;
@@ -54,7 +57,8 @@ public class GameService {
     private final MessageSender messageSender;
     private final UsersService usersService;
 
-    public GameService(LobbyRepository lobbyRepo, GameRepository gameRepo, UsersRepository usersRepo, QuestionRepository questionRepo, MessageSender messageSender, UsersService usersService) {
+    public GameService(EloSystem eloSystem, LobbyRepository lobbyRepo, GameRepository gameRepo, UsersRepository usersRepo, QuestionRepository questionRepo, MessageSender messageSender, UsersService usersService) {
+        this.eloSystem = eloSystem;
         this.lobbyRepo = lobbyRepo;
         this.gameRepo = gameRepo;
         this.usersRepo = usersRepo;
@@ -137,7 +141,7 @@ public class GameService {
     }
 
     private void addPointsToUsers(GameSession gameSession) {
-        for (Map.Entry<Users, Integer> userEntry : gameSession.getScoreMap().entrySet()) {
+        for (Map.Entry<Users, Integer> userEntry : gameSession.getEloMap().entrySet()) {
             addPointsToUser(userEntry.getKey(), userEntry.getValue());
         }
     }
@@ -158,15 +162,42 @@ public class GameService {
         Optional<Users> userOptional = usersRepo.findById(userId);
         Users user = usersService.getUserFromOptional(userOptional, userId);
         if (currentQuestion != null && currentQuestion.getAnswer().equalsIgnoreCase(answer)) {
+            messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, user.getName()));
             GameSession gameSession = gameSessionMap.get(game);
             Map<Users, Integer> scoreMap = gameSession.getScoreMap();
+            gameSession.interrupt();
             int currentScore = scoreMap.get(user) + RIGHT_ANSWER_RATE;
             scoreMap.put(user, currentScore);
-            messageSender.sendMessage(peerId, String.format(RIGHT_ANSWER, user.getName(), currentScore));
-            gameSession.interrupt();
         } else {
             messageSender.sendMessage(peerId, String.format(WRONG_ANSWER, user.getName()));
         }
     }
 
+    public Map<Users, Integer> getEloForGame(Map<Users, Integer> scoreMap) {
+        Map<Users, Integer> eloMap = new HashMap<>(scoreMap);
+        for (Map.Entry<Users, Integer> entry : eloMap.entrySet()) {
+            Users user = entry.getKey();
+            log.debug("User: " + user);
+            int userScore = scoreMap.get(user);
+            int ratingChange = 0;
+            for (Map.Entry<Users, Integer> comparedEntry : eloMap.entrySet()) {
+                if (entry.getKey() == comparedEntry.getKey()) {
+                    continue;
+                }
+                Users comparedUser = comparedEntry.getKey();
+                int comparedUserScore = scoreMap.get(comparedUser);
+                log.debug("Compared User: " + comparedUser);
+                if (userScore > comparedUserScore) {
+                    ratingChange += eloSystem.getEloChange(user, comparedUser, 1);
+                } else if (userScore < comparedUserScore) {
+                    ratingChange += eloSystem.getEloChange(user, comparedUser, 0);
+                } else {
+                    ratingChange += eloSystem.getEloChange(user, comparedUser, 0.5);
+                }
+            }
+            log.debug("Rating change for user: " + user + " rating change: " + ratingChange);
+            eloMap.put(user, ratingChange);
+        }
+        return eloMap;
+    }
 }

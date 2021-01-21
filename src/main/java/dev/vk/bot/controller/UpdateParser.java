@@ -40,7 +40,7 @@ public class UpdateParser {
         String command = update.getData().getMessage().getText();
         if (action != null) {
             updateExecutor.executeAction(peerId, action.getType());
-        } else {
+        } else if (update.getData().getMessage().getText().startsWith("/")) {
             parseCommand(userId, peerId, command);
         }
     }
