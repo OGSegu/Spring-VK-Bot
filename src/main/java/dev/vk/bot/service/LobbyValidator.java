@@ -53,7 +53,7 @@ public class LobbyValidator {
                 return new ConversationInfo();
             }
         }
-        log.info("Conversations was successfully received : " + conversationInfo.toString());
+        log.debug("Conversations was successfully received : " + conversationInfo.toString());
         return conversationInfo;
     }
 

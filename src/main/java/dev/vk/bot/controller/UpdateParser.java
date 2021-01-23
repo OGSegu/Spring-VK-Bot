@@ -42,7 +42,7 @@ public class UpdateParser {
         }
         String command = update.getData().getMessage().getText();
         if (action != null && action.getMemberId() == mainConfig.getGroupId() * -1) {
-            log.info("ACTION: " + action.toString());
+            log.debug("ACTION: " + action.toString());
             updateExecutor.executeAction(peerId, action.getType());
         } else if (update.getData().getMessage().getText().startsWith("/")) {
             parseCommand(userId, peerId, command);
@@ -84,7 +84,7 @@ public class UpdateParser {
                 }
                 break;
             default:
-                log.info("Unknown event was received");
+                log.debug("Unknown event was received");
                 break;
         }
     }

@@ -42,10 +42,10 @@ public class VkClient {
         log.debug("API REQUEST: " + apiRequest);
         LongPool longPool = restTemplate.getForObject(apiRequest, LongPool.class);
         if (longPool == null || longPool.getResponse() == null) {
-            log.info("Can't get long pool server");
+            log.debug("Can't get long pool server");
             System.exit(1);
         }
-        log.info("Long pool server was successfully received : " + longPool);
+        log.debug("Long pool server was successfully received : " + longPool);
         setLongPoolServer(longPool);
     }
 

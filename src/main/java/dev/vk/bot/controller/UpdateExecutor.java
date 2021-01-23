@@ -84,6 +84,9 @@ public class UpdateExecutor {
                 try {
                     playersAmount = Integer.parseInt(cmdWithArgs[1]);
                     maxQuestions = Integer.parseInt(cmdWithArgs[2]);
+                    if (playersAmount <= 0 | maxQuestions <= 1) {
+                        throw new IllegalArgumentException();
+                    }
                 } catch (Exception e) {
                     controller.messageSender.sendMessage(peerId, WRONG_ARGS);
                     return;
@@ -136,7 +139,7 @@ public class UpdateExecutor {
                 controller.lobbyService.createLobby(peerId);
                 break;
             default:
-                log.info("Unknown event was received");
+                log.debug("Unknown event was received");
                 break;
         }
     }

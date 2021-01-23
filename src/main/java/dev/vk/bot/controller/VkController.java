@@ -27,7 +27,7 @@ public class VkController {
         this.updateParser = updateParser;
     }
 
-    @Scheduled(fixedDelay = 100)
+    @Scheduled(fixedDelay = 1000)
     public void sendLongPoolRequest() {
         log.debug("Sending long pool request");
         String apiRequest = String.format(longPoolAPI.getLongPoolServerRequest(),
@@ -38,8 +38,12 @@ public class VkController {
         log.debug("Long pool API request: " + apiRequest);
         Event longPoolResponse = restTemplate.getForObject(apiRequest, Event.class);
         log.debug("Long pool received: " + longPoolResponse);
-        if (longPoolResponse == null || longPoolResponse.getUpdates() == null) {
+        if (longPoolResponse == null) {
             log.warn("Long pool is null");
+            return;
+        }
+        if (longPoolResponse.getUpdates() == null) {
+            log.warn("No update has been received:\n" + longPoolResponse.toString());
             return;
         }
         mainConfig.setTs(longPoolResponse.getTs());
